@@ -790,7 +790,7 @@ Edk2CAdditionalLibClass = "# Your additioanl Libraries"
 Edk2AdditionalPackage = "# Your additional Packages"
 Edk2RedfishJsonCsPackagePath = "RedfishCsIntpPkg"
 
-print ("\n\nHPE Redfish Schema to C Structure Generator Copyrights 2018")
+print ("\n\nHPE Redfish Schema to C Structure Generator Copyrights 2018 v1.0")
 
 if "-logfile" in sys.argv:
     ToolLogInformation = ToolLogger.ToolLog (TOOL_LOG_TO_FILE, "RedfishCs.log")
