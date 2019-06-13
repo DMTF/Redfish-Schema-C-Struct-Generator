@@ -23,12 +23,12 @@ from RedfishCSDef import TAB_SPACE
 from RedfishCSDef import MEMBER_DESCRIPTION_CHARS
 
 HPECopyright  = "//\n" \
-                "//  (C) Copyright 2018 Hewlett Packard Enterprise Development LP<BR>\n" \
+                "//  (C) Copyright 2018-2019 Hewlett Packard Enterprise Development LP<BR>\n" \
                 "//\n"
 
 DMTFCopyright = "//----------------------------------------------------------------------------\n" \
                 "// Copyright Notice:\n" \
-                "// Copyright 2018 Distributed Management Task Force, Inc. All rights reserved.\n" \
+                "// Copyright 2019 Distributed Management Task Force, Inc. All rights reserved.\n" \
                 "// License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/master/LICENSE.md\n" \
                 "//----------------------------------------------------------------------------\n" \
 
