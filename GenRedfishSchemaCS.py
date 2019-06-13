@@ -1,7 +1,7 @@
 #
 # Redfish JSON resource to C structure converter source code generator.
 #
-# (C) Copyright 2018 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2018-2019 Hewlett Packard Enterprise Development LP
 #
 import os
 import sys
@@ -87,6 +87,7 @@ RedfishPropertyDataType =   {
                             "string": RedfishCSDataType["char *"],
                             "boolean": RedfishCSDataType["bool *"],     
                             "number": RedfishCSDataType["long long *"],                                                       
+                            "integer": RedfishCSDataType["long long *"],
                             "array": "RedfishCS_Link",
                             "object": "RedfishCS_Link",
                             "EmptyProperty": "RedfishCS_Link"
@@ -790,7 +791,22 @@ Edk2CAdditionalLibClass = "# Your additioanl Libraries"
 Edk2AdditionalPackage = "# Your additional Packages"
 Edk2RedfishJsonCsPackagePath = "RedfishCsIntpPkg"
 
-print ("\n\nHPE Redfish Schema to C Structure Generator Copyrights 2018 v1.0")
+# Test Redfish property
+#JsonFileIo = open ("BiosAR.json")
+#Lines = JsonFileIo.readlines()
+#for i in range(0, len(Lines)): 
+#    Lines[i] = Lines[i].replace("\\\"","\"")
+#    Lines[i] = Lines[i].replace("\"","\\\"")
+#    Lines[i] = Lines[i].replace("\n","")
+#    Lines[i] = "\"" + Lines[i] + "\\n\" \\\n"
+#Lines[0] = "CHAR8 AttributeReg_text[] =  " + Lines[0]     
+#JsonFileIo.close()
+#JsonFileIo = open ("AttributeReg100.h_","w")
+#JsonFileIo.writelines (Lines)
+#JsonFileIo.close()
+# Test Redfish property
+
+print ("\n\nHPE Redfish Schema to C Structure Generator Copyrights 2018-2019 v1.1")
 
 if "-logfile" in sys.argv:
     ToolLogInformation = ToolLogger.ToolLog (TOOL_LOG_TO_FILE, "RedfishCs.log")
@@ -897,7 +913,7 @@ if not FileOnly and not DirectoryFiles:
     PrintHelpMessageExit ("Please assign -file or -all\n")       
 
 if FileOnly:
-#    try:
+#try:
     GenCS = GenRedfishSchemaCs ()     
     GenCS.File = FileName
     CurrentProcessingFile = GenCS.File
@@ -905,10 +921,10 @@ if FileOnly:
     GenCS.ParseDir = os.path.dirname(FileName)
     GenCS.GenerateCS()
     GenerateCmake()
-#    except Exception as ex:
+#except Exception as ex:
 #    PrintMessage (VERBOSE_ERROR,"Failed to generate C structure for :" + GenCS.File)  
 #    print (ex)        
-    sys.exit()
+    sys.exit(0)
 
 if DirectoryFiles:
     if not os.path.isdir(ParseDirectory):
@@ -930,5 +946,5 @@ if DirectoryFiles:
                 if ErrorStop:
                     sys.exit()
     GenerateCmake()
-    sys.exit()            
+    sys.exit(0)            
 

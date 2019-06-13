@@ -1,11 +1,12 @@
 #
 # Redfish JSON resource to C structure converter source code generator.
 #
-# (C) Copyright 2018 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2018-2019 Hewlett Packard Enterprise Development LP
 #
 import os
 import sys
 import textwrap
+import re
 
 from RedfishCSDef import REDFISH_STRUCT_NAME_HEAD
 from RedfishCSDef import REDFISH_STRUCT_NAME_TAIL
@@ -33,14 +34,15 @@ from RedfishCSDef import LOGFOR_CSTRUCTURE_TO_JSON_IS_LINK_ARRAY
 from RedfishCSDef import LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME
 from RedfishCSDef import LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME_DATATYPE
 from RedfishCSDef import LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME_JSON_KEY
+from RedfishCSDef import LOGFOR_CSTRUCTURE_TO_JSON_ALIAS_STRUCTURE_NAME
 
 HPECopyright  = "//\n" \
-                "//  (C) Copyright 2018 Hewlett Packard Enterprise Development LP<BR>\n" \
+                "//  (C) Copyright 2018-2019 Hewlett Packard Enterprise Development LP<BR>\n" \
                 "//\n"
 
 DMTFCopyright = "//----------------------------------------------------------------------------\n" \
                 "// Copyright Notice:\n" \
-                "// Copyright 2018 Distributed Management Task Force, Inc. All rights reserved.\n" \
+                "// Copyright 2019 Distributed Management Task Force, Inc. All rights reserved.\n" \
                 "// License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/master/LICENSE.md\n" \
                 "//----------------------------------------------------------------------------\n" \
 
@@ -575,7 +577,10 @@ class RedfishCS_CRelatedFile:
             # This is empty property. CreateCsJsonByNode() is used implicitely to get JSON property . CsTypeJson variable is required.
             SearchStr = "RedfishCS_status Status;\n"
             i = StrFunText.find(SearchStr)
-            StrFunText = StrFunText[:i + len (SearchStr)] + C_SRC_TAB_SPACE + "RedfishCS_Type_JSON_Data *CsTypeJson;\n" + StrFunText[i + len (SearchStr):]
+            StrFunText = StrFunText[:i + len (SearchStr)] + C_SRC_TAB_SPACE + "RedfishCS_Type_JSON_Data *CsTypeJson;\n" \
+                                                          + C_SRC_TAB_SPACE + "RedfishCS_Type_EmptyProp_CS_Data *CsTypeEmptyPropCS;\n" \
+                                                          + C_SRC_TAB_SPACE + "RedfishCS_uint32 NunmOfEmptyPropProperties;\n" \
+                                                          + StrFunText[i + len (SearchStr):]
 
         StrFunText += TempText
         StrFunText += "Error:;\n"
@@ -584,16 +589,34 @@ class RedfishCS_CRelatedFile:
         return
 
     def CCodeEmptyProp (Self, IsArrayElementEmptyProp):
-        FuncText = C_SRC_TAB_SPACE + "InitializeLinkHead (&(*Dst)->Prop);\n"
+        FuncText = C_SRC_TAB_SPACE + "InitializeLinkHead (&(*Dst)->Prop);\n\n"
         if not IsArrayElementEmptyProp:
-            FuncText += C_SRC_TAB_SPACE + "Status = CreateCsJsonByNode (Cs, JsonObj, Key, Cs->Header.ThisUri, &CsTypeJson);\n" # Get JSON property by using key
-        else:
-            FuncText += C_SRC_TAB_SPACE + "Status = CreateCsJsonByNode (Cs, TempJsonObj, NULL, Cs->Header.ThisUri, &CsTypeJson);\n" # Dump TempJsonObj directly.
+            FuncText += C_SRC_TAB_SPACE + "//\n"
+            FuncText += C_SRC_TAB_SPACE + "// Try to create C structure if the property is\n"
+            FuncText += C_SRC_TAB_SPACE + "// declared as empty property in schema. The supported property type\n"
+            FuncText += C_SRC_TAB_SPACE + "// is string, integer, real, number and boolean.\n"
+            FuncText += C_SRC_TAB_SPACE + "//\n"
+            FuncText += C_SRC_TAB_SPACE + "if (CheckEmptyPropJsonObject(TempJsonObj, &NunmOfEmptyPropProperties)) {\n"
+            FuncText += C_SRC_TAB_SPACE * 2 + "Status = CreateEmptyPropCsJson(Cs, JsonObj, Key, Cs->Header.ThisUri, &CsTypeEmptyPropCS, NunmOfEmptyPropProperties);\n"
+            FuncText += C_SRC_TAB_SPACE * 2 + "if (Status != RedfishCS_status_success) {\n"
+            FuncText += C_SRC_TAB_SPACE * 3 + "goto Error;\n"
+            FuncText += C_SRC_TAB_SPACE * 2 + "}\n"
+            FuncText += C_SRC_TAB_SPACE * 2 + "InsertTailLink(&(*Dst)->Prop, &CsTypeEmptyPropCS->Header.LinkEntry);\n"
+            FuncText += C_SRC_TAB_SPACE + "} else {\n"
 
-        FuncText += C_SRC_TAB_SPACE + "if (Status != RedfishCS_status_success) {\n" + \
+            FuncText += C_SRC_TAB_SPACE * 2 + "Status = CreateCsJsonByNode (Cs, JsonObj, Key, Cs->Header.ThisUri, &CsTypeJson);\n" # Get JSON property by using key
+            FuncText += C_SRC_TAB_SPACE * 2 + "if (Status != RedfishCS_status_success) {\n" + \
+                        C_SRC_TAB_SPACE * 3 + "goto Error;\n" + \
+                        C_SRC_TAB_SPACE * 2 + "}\n" + \
+                        C_SRC_TAB_SPACE * 2 + "InsertTailLink(&(*Dst)->Prop, &CsTypeJson->Header.LinkEntry);\n"
+            FuncText += C_SRC_TAB_SPACE + "}\n"                
+        else:
+            FuncText += C_SRC_TAB_SPACE  + "Status = CreateCsJsonByNode (Cs, TempJsonObj, NULL, Cs->Header.ThisUri, &CsTypeJson);\n" # Dump TempJsonObj directly.
+            FuncText += C_SRC_TAB_SPACE  + "if (Status != RedfishCS_status_success) {\n" + \
                     C_SRC_TAB_SPACE * 2 + "goto Error;\n" + \
-                    C_SRC_TAB_SPACE + "}\n" + \
-                    C_SRC_TAB_SPACE + "InsertTailLink(&(*Dst)->Prop, &CsTypeJson->Header.LinkEntry);\n"
+                    C_SRC_TAB_SPACE  + "}\n" + \
+                    C_SRC_TAB_SPACE  + "InsertTailLink(&(*Dst)->Prop, &CsTypeJson->Header.LinkEntry);\n"
+
         return FuncText
 
     def __init__ (self, RedfishCSInstance, SchemaFileInstance, RedfishCSStructList, StructureName, StructureMemberDataType, NonStructureMemberDataType):
@@ -604,6 +627,15 @@ class RedfishCS_CRelatedFile:
         self.StructureMemberDataType = StructureMemberDataType
         self.NonStructureMemberDataType = NonStructureMemberDataType        
         self.ArrayStructMember = {}
+
+        # 
+        # LOGFOR_CSTRUCTURE_TO_JSON_IS_ROOT = 0
+        # LOGFOR_CSTRUCTURE_TO_JSON_IS_LINK_ARRAY = 1
+        # LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME = 2
+        #   LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME_DATATYPE = 0
+        #   LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME_JSON_KEY = 1
+        # LOGFOR_CSTRUCTURE_TO_JSON_ALIAS_STRUCTURE_NAME = 3
+        #
         self.LogForCStructureToJson = {}
         
         self.CIncludeFileName = ""
@@ -699,9 +731,9 @@ class RedfishCS_CRelatedFile:
         return strToRet
 
     # This is the preparation for CSTructure to JSON function.
-    def LogCStructureToJson (self, StrucName, StructMemDataType, JsonKey, StructureMemberName, IsRoot, IsRedfishCsLinkArray):
+    def LogCStructureToJson (self, StrucName, StructMemDataType, JsonKey, StructureMemberName, IsRoot, IsRedfishCsLinkArray, AliasStructName):
         if StrucName not in self.LogForCStructureToJson:
-            self.LogForCStructureToJson [StrucName] = (IsRoot, IsRedfishCsLinkArray, {})
+            self.LogForCStructureToJson [StrucName] = (IsRoot, IsRedfishCsLinkArray, {}, AliasStructName)
 
         #if StructureMemberName not in self.LogForCStructureToJson [StrucName][2]:
         #    self.LogForCStructureToJson [StrucName][2][StructureMemberName] = 
@@ -713,8 +745,13 @@ class RedfishCS_CRelatedFile:
     def GenCStructureJSonStructureCode (self, ResourceType, SchemaVersion, StructureMemberDataType, NestedStructName, key, PrecedentKey, CStructPointer):
         StructnameShort = StructureMemberDataType.replace(REDFISH_STRUCT_NAME_HEAD + ResourceType + "_", "")
         StructnameShort = StructnameShort.replace(REDFISH_STRUCT_NAME_TAIL, "")
-        if SchemaVersion != REDFISH_SCHEMA_NAMING_NOVERSIONED:
+        if SchemaVersion == REDFISH_SCHEMA_NAMING_NOVERSIONED:
             StructnameShort = StructnameShort.replace(SchemaVersion + "_", "")
+
+        Pattern = re.compile ('[_]*[vV]*[0-9]+[_]{1}[0-9]+[_]{1}[0-9]+[_]*', 0)
+        StructnameShort = re.sub(Pattern, "_", StructnameShort)
+        StructnameShort = StructnameShort.lstrip("_")
+        StructnameShort = StructnameShort.rstrip("_")
 
         CodeStr = self.GenCStructToJsonCCodeForStructure (ResourceType, SchemaVersion, StructnameShort, NestedStructName, PrecedentKey, CStructPointer + "->" + key, False)
         if "RedfishCS_status CS_To_JSON_" + PrecedentKey in self.CStructureToJsonStructureExistFunc:
@@ -731,6 +768,8 @@ class RedfishCS_CRelatedFile:
         if CodeStr != "":
             self.CStructureToJsonStructureFuncions += CodeStr
         else:
+            self.CStructureToJsonStructureFuncions += C_SRC_TAB_SPACE + "// Check if this is RedfishCS_Type_CS_EmptyProp.\n"
+            self.CStructureToJsonStructureFuncions += C_SRC_TAB_SPACE + "CsEmptyPropLinkToJson(CsJson, Key, &CSPtr->Prop);\n"
             self.CStructureToJsonStructureFuncions += C_SRC_TAB_SPACE + "// No JSON property for this structure.\n"
 
         self.CStructureToJsonStructureFuncions += C_SRC_TAB_SPACE + "return RedfishCS_status_success;\n"        
@@ -745,6 +784,11 @@ class RedfishCS_CRelatedFile:
         StructnameShort = StructnameShort.replace(REDFISH_STRUCT_NAME_TAIL, "")
         if SchemaVersion != REDFISH_SCHEMA_NAMING_NOVERSIONED:
             StructnameShort = StructnameShort.replace(SchemaVersion + "_", "")
+
+        Pattern = re.compile ('[_]*[vV]*[0-9]+[_]{1}[0-9]+[_]{1}[0-9]+[_]*', 0)
+        StructnameShort = re.sub(Pattern, "_", StructnameShort)
+        StructnameShort = StructnameShort.lstrip("_")
+        StructnameShort = StructnameShort.rstrip("_")
 
         CodeStr = self.GenCStructToJsonCCodeForStructure (ResourceType, SchemaVersion, StructnameShort, NestedStructName, PrecedentKey, CStructPointer + "->" + key, True)
         if "RedfishCS_status CS_To_JSON_" + PrecedentKey in self.CStructureToJsonStructureExistFunc:
@@ -791,24 +835,31 @@ class RedfishCS_CRelatedFile:
 
     def GenCStructToJsonCCodeForStructure (self, ResourceType, SchemaVersion, StructureName, NestedStructName, PrecedentKey, CStructPointer, IsArrayStruct):
         CodeStr = ""
-        if StructureName not in self.LogForCStructureToJson:
-            if "_Array" not in StructureName:
-                return "" # No structure for this StructureName. It coudl be {}
+        StructureNameRef = StructureName
+        if StructureNameRef not in self.LogForCStructureToJson:
+            for StructNameKey in self.LogForCStructureToJson.keys():
+                if StructureNameRef == self.LogForCStructureToJson[StructNameKey][LOGFOR_CSTRUCTURE_TO_JSON_ALIAS_STRUCTURE_NAME]:
+                    StructureNameRef = StructNameKey;
+                    break
 
-            if StructureName not in self.CCodeGenJsonNaturalArrayFun:
+        if StructureNameRef not in self.LogForCStructureToJson:
+            if "_Array" not in StructureNameRef:
+                return "" # No structure for this StructureNameRef. It coudl be {}
+
+            if StructureNameRef not in self.CCodeGenJsonNaturalArrayFun:
                 ArrayStructName = CStructPointer.replace ("->", "_").lstrip("_")
                 if "_" not in ArrayStructName:
                     if ResourceType + "_" + ArrayStructName not in self.ArrayStructMember [ResourceType][SchemaVersion]:
-                        print ("Array structure not found in ArrayStructMember for converting to JSON: " + StructureName)
+                        print ("Array structure not found in ArrayStructMember for converting to JSON: " + StructureNameRef)
                         sys.exit()
                     else:
                         ArrayStructName = ResourceType + "_" + ArrayStructName
 
                 NewNestedStructName = NestedStructName
                 if NestedStructName == "":
-                    NewNestedStructName = StructureName.replace("_Array", "")
+                    NewNestedStructName = StructureNameRef.replace("_Array", "")
                 else:
-                    NewNestedStructName = NestedStructName + "_" + StructureName.replace("_Array", "")
+                    NewNestedStructName = NestedStructName + "_" + StructureNameRef.replace("_Array", "")
 
                 # Loop to check if structure array declared in ArrayStructMember
                 # Structure name + member name is the key record in ArrayStructName for the nested structure.
@@ -824,7 +875,7 @@ class RedfishCS_CRelatedFile:
                         for MemberNum in range (1,len (CStructPointer.split ("->"))-1):
                             NewCStructPointer += "->" + CStructPointer.split ("->")[MemberNum]
                         # Generate function call for array JSON
-                        self.GenCStructureJSonStructureArrayCode (ResourceType, SchemaVersion, ArrayStructName, NewNestedStructName, ArrayStructWrapperName, StructureName.replace("_Array", ""), PrecedentKey, NewCStructPointer)
+                        self.GenCStructureJSonStructureArrayCode (ResourceType, SchemaVersion, ArrayStructName, NewNestedStructName, ArrayStructWrapperName, StructureNameRef.replace("_Array", ""), PrecedentKey, NewCStructPointer)
                         return
                     else:
                         NewArrayStructNameList = NewArrayStructName.split("_")
@@ -833,25 +884,25 @@ class RedfishCS_CRelatedFile:
                             NewArrayStructName += NewArrayStructNameList[NewArrayStructNameListIndex] + "_"
                         NewArrayStructName += NewArrayStructNameList[len(NewArrayStructNameList) - 1]
                         #NewArrayStructName = NewArrayStructName.lstrip (NewArrayStructName.split("_")[0] + "_")
-                print ("Array structure not found in ArrayStructMember for converting to JSON: " + StructureName)
+                print ("Array structure not found in ArrayStructMember for converting to JSON: " + StructureNameRef)
                 sys.exit()
 
-        for key in sorted (self.LogForCStructureToJson[StructureName][LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME].keys ()):
-            StructureMemberDataType = self.LogForCStructureToJson[StructureName][LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME][key][LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME_DATATYPE]
+        for key in sorted (self.LogForCStructureToJson[StructureNameRef][LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME].keys ()):
+            StructureMemberDataType = self.LogForCStructureToJson[StructureNameRef][LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME][key][LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME_DATATYPE]
             if StructureMemberDataType in self.CCodeGenJsonFun:
-                CodeStr += self.CCodeGenJsonFun [StructureMemberDataType](StructureName, key, CStructPointer, IsArrayStruct)
+                CodeStr += self.CCodeGenJsonFun [StructureMemberDataType](StructureNameRef, key, CStructPointer, IsArrayStruct)
             elif StructureMemberDataType in self.CCodeGenJsonNaturalArrayFun:
-                CodeStr += self.CCodeGenJsonNaturalArrayFun [StructureMemberDataType](StructureName, key, CStructPointer, IsArrayStruct)             
+                CodeStr += self.CCodeGenJsonNaturalArrayFun [StructureMemberDataType](StructureNameRef, key, CStructPointer, IsArrayStruct)             
             else:
                 # Check if StructureMemberDataType in any structure data type
                 StructureFound = False
                 try:
                     #for StructureNameKey in self.LogForCStructureToJson:
-                    for StructureMemberNameKey in self.LogForCStructureToJson[StructureName][LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME]:
-                        if StructureMemberDataType == self.LogForCStructureToJson[StructureName][LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME][StructureMemberNameKey][LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME_DATATYPE] and \
+                    for StructureMemberNameKey in self.LogForCStructureToJson[StructureNameRef][LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME]:
+                        if StructureMemberDataType == self.LogForCStructureToJson[StructureNameRef][LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME][StructureMemberNameKey][LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME_DATATYPE] and \
                             key == StructureMemberNameKey:
                             # This is structure type.
-                            JsonKey = self.LogForCStructureToJson[StructureName][LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME][StructureMemberNameKey][LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME_JSON_KEY]
+                            JsonKey = self.LogForCStructureToJson[StructureNameRef][LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME][StructureMemberNameKey][LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME_JSON_KEY]
                                 
                             if IsArrayStruct:
                                 CodeStr += C_SRC_TAB_SPACE * 2 + "// " + JsonKey + "\n"
@@ -863,9 +914,9 @@ class RedfishCS_CRelatedFile:
 
                             NewNestedStructName = NestedStructName
                             if NestedStructName == "":
-                                NewNestedStructName = StructureName
+                                NewNestedStructName = StructureNameRef
                             else:
-                                NewNestedStructName = NestedStructName + "_" + StructureName
+                                NewNestedStructName = NestedStructName + "_" + StructureNameRef
                             self.GenCStructureJSonStructureCode (ResourceType, SchemaVersion, StructureMemberDataType, NewNestedStructName, StructureMemberNameKey, PrecedentKey + StructureMemberNameKey, CStructPointer)
                             StructureFound = True
                             raise BreakForLoop
@@ -975,7 +1026,11 @@ class RedfishCS_CRelatedFile:
                         Member = self.FormatingStructMemberName (Member)
                         StructMemDataType, IsRedfishCsLinkArray = self.FormatingStructMemberDataType (StructureMemberDataType [key][STRUCTURE_MEMBER_TUPLE_DATATYPE], ResourceType, SchemaVersion, key)
                         # Log member information for CStructure to JSON function.
-                        self.LogCStructureToJson (StrucName, StructMemDataType, JsonKey, Member,  IsRoot, IsRedfishCsLinkArray)
+                        StructNameOrg = StructureName [ResourceType][SchemaVersion][StrucName][STRUCTURE_NAME_TUPLE_NAME]
+                        StructNameOrg = StructNameOrg.replace (SchemaVersion + "_", "")
+                        StructNameOrg = StructNameOrg.replace (REDFISH_STRUCT_NAME_TAIL, "")
+                        #self.LogCStructureToJson (StructNameOrg, StructMemDataType, JsonKey, Member,  IsRoot, IsRedfishCsLinkArray)
+                        self.LogCStructureToJson (StrucName, StructMemDataType, JsonKey, Member,  IsRoot, IsRedfishCsLinkArray, StructNameOrg)
 
                         if MaxStrucDataTypeLen > len (StructMemDataType):
                             spaces = MaxStrucDataTypeLen - len (StructMemDataType)
@@ -1346,8 +1401,10 @@ class RedfishCS_CRelatedFile:
         self.CTextFile += ("RedfishCS_status InsertJsonLinkArrayObj (json_t *JsonObj, char *Key, RedfishCS_Link *LinkArray);\n")        
         self.CTextFile += ("RedfishCS_status InsertJsonInt64ArrayObj (json_t *ParentJsonObj, char *Key, RedfishCS_int64_Array *Int64ValueArray);\n")   
         self.CTextFile += ("RedfishCS_status InsertJsonBoolArrayObj (json_t *ParentJsonObj, char *Key, RedfishCS_bool_Array *BoolValueArray);\n")
-        self.CTextFile += ("RedfishCS_status InsertJsonVagueObj (json_t *ParentJsonObj, char *Key, RedfishCS_Vague *VagueValue);\n\n")
-
+        self.CTextFile += ("RedfishCS_status InsertJsonVagueObj (json_t *ParentJsonObj, char *Key, RedfishCS_Vague *VagueValue);\n")
+        self.CTextFile += ("RedfishCS_bool CheckEmptyPropJsonObject(json_t *JsonObj, RedfishCS_uint32 *NumOfProperty);\n")
+        self.CTextFile += ("RedfishCS_status CreateEmptyPropCsJson(RedfishCS_void *Cs, json_t *JsonOj, RedfishCS_char *NodeName, RedfishCS_char *ParentUri, RedfishCS_Type_EmptyProp_CS_Data **CsTypeEmptyPropCS, RedfishCS_uint32 NunmOfProperties);\n")
+        self.CTextFile += ("RedfishCS_status CsEmptyPropLinkToJson(json_t *CsJson, char *Key, RedfishCS_Link *Link);\n\n")                        
 
         self.CFuncText = []
         FunText = ""
