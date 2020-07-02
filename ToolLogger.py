@@ -43,12 +43,12 @@ class ToolLog(object):
         self.SimpleDotsCarryReturn = 80
         if self.Logtype == TOOL_LOG_TO_FILE:
             self.LogFilePath = LogFilePath
-        if os.path.exists (self.LogFilePath) == True:
-            fdo = open (self.LogFilePath, "a") 
-        else:
-            fdo = open (self.LogFilePath, "w")    
-        fdo.writelines ("\n\n======= " + str(datetime.datetime.now()) + " =============\n")
-        fdo.close()
+            if os.path.exists (self.LogFilePath) == True:
+                fdo = open (self.LogFilePath, "a") 
+            else:
+                fdo = open (self.LogFilePath, "w")    
+            fdo.writelines ("\n\n======= " + str(datetime.datetime.now()) + " =============\n")
+            fdo.close()
         
     ## Log the message
     #

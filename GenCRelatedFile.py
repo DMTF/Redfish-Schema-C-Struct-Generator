@@ -37,14 +37,15 @@ from RedfishCSDef import LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME_JSON_KEY
 from RedfishCSDef import LOGFOR_CSTRUCTURE_TO_JSON_ALIAS_STRUCTURE_NAME
 
 HPECopyright  = "//\n" \
-                "//  (C) Copyright 2018-2019 Hewlett Packard Enterprise Development LP<BR>\n" \
+                "// Auto-generated file by Redfish Schema C Structure Generator.\n" + \
+                "// https://github.com/DMTF/Redfish-Schema-C-Struct-Generator.\n" + \
+                "//\n" + \
+                "//  (C) Copyright 2019 Hewlett Packard Enterprise Development LP<BR>\n" + \
+                "//\n" + \
+                "// Copyright Notice:\n" + \
+                "// Copyright 2020 Distributed Management Task Force, Inc. All rights reserved.\n" + \
+                "// License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/master/LICENSE.md\n" +\
                 "//\n"
-
-DMTFCopyright = "//----------------------------------------------------------------------------\n" \
-                "// Copyright Notice:\n" \
-                "// Copyright 2019 Distributed Management Task Force, Inc. All rights reserved.\n" \
-                "// License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/master/LICENSE.md\n" \
-                "//----------------------------------------------------------------------------\n" \
 
 CCodeErrorExitCode = C_SRC_TAB_SPACE + "if (Status != RedfishCS_status_success) {\n" +\
                      C_SRC_TAB_SPACE * 2 + "goto Error;\n" +\
@@ -55,6 +56,12 @@ NatrualDataTypeArray = ["RedfishCS_Link","RedfishCS_char","RedfishCS_bool","Redf
 class BreakForLoop(Exception):pass
 
 class RedfishCS_CRelatedFile:
+    def RemoveStructureNameHead (Self, StructureName):
+        StructMemHeadList = StructureName.split('_');
+        StructMemHead = StructMemHeadList[0].replace (REDFISH_STRUCT_NAME_HEAD, "")
+        for StructMemHeadListIndex in range (1, len (StructMemHeadList)):
+            StructMemHead += '_' + StructMemHeadList[StructMemHeadListIndex] 
+        return StructMemHead      
 
     def IsKeyRequiredError (self, StructureMemberDataType, StructDataTypeKey, Member, IsRootStruc):
         if IsRootStruc:
@@ -467,7 +474,9 @@ class RedfishCS_CRelatedFile:
             JsonPtr = "TempJsonObj"
             StrucPtr = "&(*Dst)->"
 
-        StructFuncName = StructArrayMemDataType.replace (REDFISH_STRUCT_NAME_HEAD, "").replace (REDFISH_STRUCT_NAME_TAIL, "")                 
+        #StructFuncName = StructArrayMemDataType.replace (REDFISH_STRUCT_NAME_HEAD, "").replace (REDFISH_STRUCT_NAME_TAIL, "")
+        StructFuncName = self.RemoveStructureNameHead (StructArrayMemDataType).replace (REDFISH_STRUCT_NAME_TAIL, "")
+
         StructFuncName = StructFuncName.replace (ResourceType + "_", "").replace (SchemaVersion + "_", "")
         StrFunText = C_SRC_TAB_SPACE + "Status = Gen" + StructFuncName + "Cs (Cs, " + JsonPtr + ", \"" +\
                      StructureMemberDataType[StructDataTypeKey][STRUCTURE_MEMBER_TUPLE_ORG_KEY_NAME] + "\", " + StrucPtr + \
@@ -485,7 +494,8 @@ class RedfishCS_CRelatedFile:
             JsonPtr = "TempJsonObj"
             StrucPtr = "&(*Dst)->"
 
-        StructFuncName = StructureMemberDataType[StructDataTypeKey][STRUCTURE_MEMBER_TUPLE_DATATYPE].replace (REDFISH_STRUCT_NAME_HEAD, "").replace (REDFISH_STRUCT_NAME_TAIL, "")
+        #StructFuncName = StructureMemberDataType[StructDataTypeKey][STRUCTURE_MEMBER_TUPLE_DATATYPE].replace (REDFISH_STRUCT_NAME_HEAD, "").replace (REDFISH_STRUCT_NAME_TAIL, "")
+        StructFuncName = self.RemoveStructureNameHead (StructureMemberDataType[StructDataTypeKey][STRUCTURE_MEMBER_TUPLE_DATATYPE]).replace(REDFISH_STRUCT_NAME_TAIL, "")
         StructFuncName = StructFuncName.replace(ResourceType + "_", "").replace (SchemaVersion + "_", "").replace (TypeName + "_", "").replace (" *", "")
         StrFunText = C_SRC_TAB_SPACE + "Status = Gen" + StructFuncName + "Cs (Cs, " + JsonPtr + ", \"" +\
                      StructureMemberDataType[StructDataTypeKey][STRUCTURE_MEMBER_TUPLE_ORG_KEY_NAME] + "\", " + StrucPtr + \
@@ -743,7 +753,7 @@ class RedfishCS_CRelatedFile:
             self.LogForCStructureToJson [StrucName] [LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME] [StructureMemberName] = (StructMemDataType, JsonKey)
 
     def GenCStructureJSonStructureCode (self, ResourceType, SchemaVersion, StructureMemberDataType, NestedStructName, key, PrecedentKey, CStructPointer):
-        StructnameShort = StructureMemberDataType.replace(REDFISH_STRUCT_NAME_HEAD + ResourceType + "_", "")
+        StructnameShort = StructureMemberDataType.replace (REDFISH_STRUCT_NAME_HEAD + ResourceType + "_", "")
         StructnameShort = StructnameShort.replace(REDFISH_STRUCT_NAME_TAIL, "")
         if SchemaVersion == REDFISH_SCHEMA_NAMING_NOVERSIONED:
             StructnameShort = StructnameShort.replace(SchemaVersion + "_", "")
@@ -780,7 +790,7 @@ class RedfishCS_CRelatedFile:
         return   
 
     def GenCStructureJSonStructureArrayCode (self, ResourceType, SchemaVersion, StructureMemberDataType, NestedStructName, ArrayStructWrapperName, key, PrecedentKey, CStructPointer):
-        StructnameShort = StructureMemberDataType.replace(REDFISH_STRUCT_NAME_HEAD + ResourceType + "_", "")
+        StructnameShort = StructureMemberDataType.replace (REDFISH_STRUCT_NAME_HEAD + ResourceType + "_", "")
         StructnameShort = StructnameShort.replace(REDFISH_STRUCT_NAME_TAIL, "")
         if SchemaVersion != REDFISH_SCHEMA_NAMING_NOVERSIONED:
             StructnameShort = StructnameShort.replace(SchemaVersion + "_", "")
@@ -974,7 +984,8 @@ class RedfishCS_CRelatedFile:
             else:     
                 typedef += "typedef struct " + "_" + Name  + " {\n"            
 
-        StructMemHead = StructureName [ResourceType][SchemaVersion][StrucName][STRUCTURE_NAME_TUPLE_NAME].replace (REDFISH_STRUCT_NAME_HEAD, "")
+        #StructMemHead = StructureName [ResourceType][SchemaVersion][StrucName][STRUCTURE_NAME_TUPLE_NAME].replace (REDFISH_STRUCT_NAME_HEAD, "")
+        StructMemHead = self.RemoveStructureNameHead (StructureName [ResourceType][SchemaVersion][StrucName][STRUCTURE_NAME_TUPLE_NAME])
         StructMemHead = StructMemHead.replace(REDFISH_STRUCT_NAME_TAIL, "")
 
         # Loop to see the maximum length of structure member data type string for the code cosmetics.
@@ -1246,12 +1257,14 @@ class RedfishCS_CRelatedFile:
         StrucNameList = StrucName.split('_')
         # Loop to check each structure member
         if len (StrucName.split ('_')) > 1 and TypeName == StrucName.split ('_')[0]: # This is the object defined under ResourceType,SchemaVersion,TypeName
-            StructMemHead = StructureName [ResourceType][SchemaVersion][StrucName][STRUCTURE_NAME_TUPLE_NAME].replace (REDFISH_STRUCT_NAME_HEAD, "")
+            #StructMemHead = StructureName [ResourceType][SchemaVersion][StrucName][STRUCTURE_NAME_TUPLE_NAME].replace (REDFISH_STRUCT_NAME_HEAD, "")
+            StructMemHead = self.RemoveStructureNameHead (StructureName [ResourceType][SchemaVersion][StrucName][STRUCTURE_NAME_TUPLE_NAME])
 
         elif len (StrucNameList) > 1 and TypeName not in StrucNameList [len(StrucNameList) - 1]: # This is the nested object defined under ResourceType,SchemaVersion,TypeName
             if TypeName not in StrucNameList: # Structure name is difer than structure member name
                 if TypeName in StructureName [ResourceType][SchemaVersion]:
-                    StructMemHead = StructureName [ResourceType][SchemaVersion][TypeName][STRUCTURE_NAME_TUPLE_NAME].replace (REDFISH_STRUCT_NAME_HEAD, "")
+                    #StructMemHead = StructureName [ResourceType][SchemaVersion][TypeName][STRUCTURE_NAME_TUPLE_NAME].replace (REDFISH_STRUCT_NAME_HEAD, "")
+                    StructMemHead = self.RemoveStructureNameHead (StructureName [ResourceType][SchemaVersion][TypeName][STRUCTURE_NAME_TUPLE_NAME])
                 else:
                     # No member found, means the properties for this data type is "{}"
                     return self.CCodeEmptyProp (IsArrayElement), True                        
@@ -1271,7 +1284,8 @@ class RedfishCS_CRelatedFile:
                     return self.CCodeEmptyProp (IsArrayElement), True                
 
         elif TypeName in StructureName [ResourceType][SchemaVersion]: # This is the object defined in #/definitions/
-            StructMemHead = StructureName [ResourceType][SchemaVersion][TypeName][STRUCTURE_NAME_TUPLE_NAME].replace (REDFISH_STRUCT_NAME_HEAD, "")
+            #StructMemHead = StructureName [ResourceType][SchemaVersion][TypeName][STRUCTURE_NAME_TUPLE_NAME].replace (REDFISH_STRUCT_NAME_HEAD, "")
+            StructMemHead = self.RemoveStructureNameHead (StructureName [ResourceType][SchemaVersion][TypeName][STRUCTURE_NAME_TUPLE_NAME])
              
         else:
             # No member found, means the properties for this data type is "{}"
@@ -1320,7 +1334,8 @@ class RedfishCS_CRelatedFile:
                                         except BreakForLoop:
                                             pass                                                    
 
-                                StructDataType = StructMemDataType.replace (REDFISH_STRUCT_NAME_HEAD, "").replace(REDFISH_STRUCT_NAME_TAIL, "")
+                                #StructDataType = StructMemDataType.replace (REDFISH_STRUCT_NAME_HEAD, "").replace(REDFISH_STRUCT_NAME_TAIL, "")
+                                StructDataType = self.RemoveStructureNameHead (StructMemDataType).replace(REDFISH_STRUCT_NAME_TAIL, "")
                                 NewResourceType = StructDataType.split('_')[0]
                                 if REDFISH_SCHEMA_NAMING_NOVERSIONED in StructureMemberDataType [key][STRUCTURE_MEMBER_TUPLE_DATATYPE]:
                                     NewSchemaVersion = REDFISH_SCHEMA_NAMING_NOVERSIONED

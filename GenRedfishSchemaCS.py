@@ -277,6 +277,9 @@ def GetRedfishMetadataNamespaceFromRefUri (Uri):
         Version = Version.replace ('.', '')
         if Version == "":
             Version = REDFISH_SCHEMA_NAMING_NOVERSIONED
+        
+        if '-' in ResourceType:
+            ResourceType = ResourceType.replace('-', '')
         return [ResourceType, Version, ResourceTypeRef[1].replace ("/definitions/", "")]
 
 
@@ -533,6 +536,8 @@ class RedfishSchemaFile:
         if os.path.exists(self.FileAboslutePath) == True:
             # Extract namespace of Redfish resource from file name.
             self.ResourceType = os.path.split(self.FileAboslutePath)[1].split ('.')[0]
+            if '-' in self.ResourceType:
+                self.ResourceType = self.ResourceType.replace ('-', '')
             self.SchemaVersion = os.path.split(self.FileAboslutePath)[1].split ('.')[1]
             if self.SchemaVersion == "json":
                 # This schema has no verion control.
@@ -811,7 +816,7 @@ print ("\n\nHPE Redfish Schema to C Structure Generator Copyrights 2018-2019 v1.
 if "-logfile" in sys.argv:
     ToolLogInformation = ToolLogger.ToolLog (TOOL_LOG_TO_FILE, "RedfishCs.log")
 else:
-    ToolLogInformation = ToolLogger.ToolLog (TOOL_LOG_TO_CONSOLE,)  
+    ToolLogInformation = ToolLogger.ToolLog (TOOL_LOG_TO_CONSOLE, "")  
 
 for argIndex in range (1, len(sys.argv)):       
     if "-v" in sys.argv [argIndex]:

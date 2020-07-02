@@ -1,7 +1,7 @@
 #
 # Redfish JSON resource to C structure converter source code generator.
 #
-# (C) Copyright 2018 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2018-2019 Hewlett Packard Enterprise Development LP
 #
 import os
 import sys
@@ -23,18 +23,28 @@ from RedfishCSDef import TAB_SPACE
 from RedfishCSDef import MEMBER_DESCRIPTION_CHARS
 
 HPECopyright  = "//\n" \
-                "//  (C) Copyright 2018-2019 Hewlett Packard Enterprise Development LP<BR>\n" \
+                "// Auto-generated file by Redfish Schema C Structure Generator.\n" + \
+                "// https://github.com/DMTF/Redfish-Schema-C-Struct-Generator.\n" + \
+                "//\n" + \
+                "//  (C) Copyright 2019-2020 Hewlett Packard Enterprise Development LP<BR>\n" + \
+                "//\n" + \
+                "//  SPDX-License-Identifier: BSD-2-Clause-Patent\n" + \
                 "//\n"
 
-DMTFCopyright = "//----------------------------------------------------------------------------\n" \
+DMTFCopyright = "//----------------------------------------------------------------------------\n" + \
                 "// Copyright Notice:\n" \
-                "// Copyright 2019 Distributed Management Task Force, Inc. All rights reserved.\n" \
-                "// License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/master/LICENSE.md\n" \
-                "//----------------------------------------------------------------------------\n" \
+                "// Copyright 2020 Distributed Management Task Force, Inc. All rights reserved.\n" + \
+                "// License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/master/LICENSE.md\n" + \
+                "//----------------------------------------------------------------------------\n"
 
-Edk2InfFileCopyright = "#\n" \
-                       "#  (C) Copyright 2018 Hewlett Packard Enterprise Development LP<BR>\n" \
-                       "#\n\n"
+Edk2InfFileCopyright = "#\n" + \
+                       "# Auto-generated file by Redfish Schema C Structure Generator.\n" + \
+                       "# https://github.com/DMTF/Redfish-Schema-C-Struct-Generator.\n" + \
+                       "#\n" + \
+                       "#  (C) Copyright 2019-2020 Hewlett Packard Enterprise Development LP<BR>\n" + \
+                       "#\n" + \
+                       "#  SPDX-License-Identifier: BSD-2-Clause-Patent\n" + \
+                       "#\n"
 
 Edk2InfFileTemp = "[Defines]\n" + \
                   "INF_VERSION                    = 0x00010006\n" + \
@@ -55,8 +65,8 @@ Edk2InfSourceSectionTemp = "[Sources]\n" + \
                            "  !**PREFIX_FORWARD_DIR**!../../src/RedfishCsMemory.c\n\n"
 Edk2InfPackageSectionTemp = "[Packages]\n" + \
                             "  MdePkg/MdePkg.dec\n" + \
-                            "  !**ADDITIONAL_PACKAGE**!\n" + \
-                            "  StdLib/StdLib.dec\n\n"
+                            "  !**ADDITIONAL_PACKAGE**!\n\n" # + \
+                            #"  StdLib/StdLib.dec\n\n"
 
 Edk2InfLibSectionTemp    = "[LibraryClasses]\n" + \
                            "  BaseLib\n" + \
@@ -67,7 +77,19 @@ Edk2InfLibSectionTemp    = "[LibraryClasses]\n" + \
 
 Edk2BindingDir = "/edk2"
 Edk2BuildOptionSectionTemp    = "[BuildOptions]\n" + \
-                                "  MSFT:*_*_X64_CC_FLAGS = /I$(WORKSPACE)/RedfishPocPkg/Library/RfishCS" + Edk2BindingDir
+  "  #\n" + \
+  "  # Disables the following Visual Studio compiler warnings\n" + \
+  "  # so we do not break the build with /WX option:\n" + \
+  "  #   C4090: 'function' : different 'const' qualifiers\n" + \
+  "  #   C4244: conversion from type1 to type2, possible loss of data\n" + \
+  "  #   C4245: conversion from type1 to type2, signed/unsigned mismatch\n" + \
+  "  #   C4267: conversion from size_t to type, possible loss of data\n" + \
+  "  #   C4306: 'identifier' : conversion from 'type1' to 'type2' of greater size\n" + \
+  "  #   C4389: 'operator' : signed/unsigned mismatch (xxxx)\n" + \
+  "  #   C4702: unreachable code\n" + \
+  "  #   C4706: assignment within conditional expression\n" + \
+  "  #\n" + \
+   "  MSFT:*_*_*_CC_FLAGS = /X /wd4204 /wd4702 /wd4706 /wd4244 /wd4090 /wd4456 /wd4334\n"
 
 class RedfishCSEdk2:
     def __init__ (self, RedfishCSInstance, SchemaFileInstance, RedfishCSStructList, StructureName, StructureMemberDataType, NonStructureMemberDataType, GenCS_Cfiles, OutputDir):
@@ -80,7 +102,7 @@ class RedfishCSEdk2:
         self.NonStructureMemberDataType = NonStructureMemberDataType
         self.Edk2OutputDir = os.path.normpath(OutputDir + Edk2BindingDir)
         self.Edk2RedfishIntpOutputDir = os.path.normpath(OutputDir + "/RedfishCsIntp")
-        self.Edk2RedfishIntpTempFilesDir = os.path.normpath(OutputDir + "/_Edk2OpenSourceTempFiles")        
+        self.Edk2RedfishIntpTempFilesDir = os.path.normpath(os.getcwd() + "/_Edk2OpenSourceTempFiles")        
         self.Edk2RedfishIntpTempDxeC = ""
         self.Edk2RedfishIntpTempDxeInf = ""
         self.Edk2RedfishIntpTempInclude = ""
@@ -224,8 +246,8 @@ class RedfishCSEdk2:
 
     def GenEdk2RedfishIntpFile(self):
         RedfishCs = self.RedfishCsList        
-        RedfishCsInterpreter_Include_Dir = self.Edk2RedfishIntpOutputDir + os.path.normpath("/Include/RedfishInterpreter/" + self.Edk2CsIncludeFileRelativePath)
-        RedfishCsInterpreter_Source_Dir = self.Edk2RedfishIntpOutputDir + os.path.normpath("/RedfishSchemaInterpreter")
+        RedfishCsInterpreter_Include_Dir = self.Edk2RedfishIntpOutputDir + os.path.normpath("/Include/RedfishJsonStructure/" + self.Edk2CsIncludeFileRelativePath)
+        RedfishCsInterpreter_Source_Dir = self.Edk2RedfishIntpOutputDir + os.path.normpath("/RedfishJsonStructure")
         if not os.path.exists (self.Edk2RedfishIntpOutputDir):                
             os.makedirs(RedfishCsInterpreter_Include_Dir)
             os.makedirs(RedfishCsInterpreter_Source_Dir)
@@ -335,16 +357,16 @@ class RedfishCSEdk2:
 
         fo = open(self.Edk2RedfishIntpOutputDir + os.path.normpath("/" + self.Edk2RedfishIntpComponentDsc),"a")
         if SchemaVersion == "":
-            fo.write("  " + self.Edk2RedfishJsonCsPackagePath + "RedfishSchemaInterpreter/" + RedfishCs.ResourceType + "/" + RedfishCsSchemaDxe_INF_File + "\n")
+            fo.write("  " + self.Edk2RedfishJsonCsPackagePath + "RedfishJsonStructure/" + RedfishCs.ResourceType + "/" + RedfishCsSchemaDxe_INF_File + "\n")
         else:
-            fo.write("  " + self.Edk2RedfishJsonCsPackagePath + "RedfishSchemaInterpreter/" + RedfishCs.ResourceType + "/" + SchemaVersion + "/" + RedfishCsSchemaDxe_INF_File + "\n")
+            fo.write("  " + self.Edk2RedfishJsonCsPackagePath + "RedfishJsonStructure/" + RedfishCs.ResourceType + "/" + SchemaVersion + "/" + RedfishCsSchemaDxe_INF_File + "\n")
         fo.close()
 
         fo = open(self.Edk2RedfishIntpOutputDir + os.path.normpath("/" + self.Edk2RedfishIntpLibDsc),"a")
         if SchemaVersion == "":
-            fo.write("  " + self.LibClass + "|" + self.Edk2RedfishJsonCsPackagePath + "Library/RfishCS" + Edk2BindingDir + "/" + RedfishCs.ResourceType + "/Lib.inf" + "\n")
+            fo.write("  " + self.LibClass + "|" + self.Edk2RedfishJsonCsPackagePath + "Library/RedfishCSLib" + Edk2BindingDir + "/" + RedfishCs.ResourceType + "/Lib.inf" + "\n")
         else:
-            fo.write("  " + self.LibClass + "|" + self.Edk2RedfishJsonCsPackagePath + "Library/RfishCS" + Edk2BindingDir + "/" + RedfishCs.ResourceType + "/" + SchemaVersion + "/Lib.inf" + "\n")
+            fo.write("  " + self.LibClass + "|" + self.Edk2RedfishJsonCsPackagePath + "Library/RedfishCSLib" + Edk2BindingDir + "/" + RedfishCs.ResourceType + "/" + SchemaVersion + "/Lib.inf" + "\n")
         fo.close()        
 
         fo = open(os.path.normpath(RedfishCsInterpreter_Source_Schema_dir + "/" + RedfishCsSchemaDxe_C_File),"w")
