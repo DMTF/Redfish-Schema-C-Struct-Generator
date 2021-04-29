@@ -56,11 +56,11 @@ Edk2InfFileTemp = "[Defines]\n" + \
                   "#\n" + \
                   "# The following information is for reference only and not required by the build tools.\n" + \
                   "#\n" + \
-                  "#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC\n" + \
+                  "#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC RISCV64\n" + \
                   "#\n\n"
 
 Edk2InfSourceSectionTemp = "[Sources]\n" + \
-                           "  !**PREFIX_FORWARD_DIR**!../RedfishDataTypeDef.h\n" + \
+                           "  !**PREFIX_FORWARD_DIR**!../../include/RedfishDataTypeDef.h\n" + \
                            "  !**PREFIX_FORWARD_DIR**!../../src/RedfishCsCommon.c\n" + \
                            "  !**PREFIX_FORWARD_DIR**!../../src/RedfishCsMemory.c\n\n"
 Edk2InfPackageSectionTemp = "[Packages]\n" + \
@@ -70,26 +70,19 @@ Edk2InfPackageSectionTemp = "[Packages]\n" + \
 
 Edk2InfLibSectionTemp    = "[LibraryClasses]\n" + \
                            "  BaseLib\n" + \
+                           "  BaseMemoryLib\n" + \
                            "  DebugLib\n" + \
                            "  MemoryAllocationLib\n" + \
-                           "  BaseMemoryLib\n" + \
                            "  !**ADDITIONAL_LIBRARIES**!\n\n" 
 
-Edk2BindingDir = "/edk2"
+Edk2BindingDir = "/edk2library"
 Edk2BuildOptionSectionTemp    = "[BuildOptions]\n" + \
   "  #\n" + \
   "  # Disables the following Visual Studio compiler warnings\n" + \
   "  # so we do not break the build with /WX option:\n" + \
-  "  #   C4090: 'function' : different 'const' qualifiers\n" + \
-  "  #   C4244: conversion from type1 to type2, possible loss of data\n" + \
-  "  #   C4245: conversion from type1 to type2, signed/unsigned mismatch\n" + \
-  "  #   C4267: conversion from size_t to type, possible loss of data\n" + \
-  "  #   C4306: 'identifier' : conversion from 'type1' to 'type2' of greater size\n" + \
-  "  #   C4389: 'operator' : signed/unsigned mismatch (xxxx)\n" + \
-  "  #   C4702: unreachable code\n" + \
   "  #   C4706: assignment within conditional expression\n" + \
   "  #\n" + \
-   "  MSFT:*_*_*_CC_FLAGS = /X /wd4204 /wd4702 /wd4706 /wd4244 /wd4090 /wd4456 /wd4334\n"
+   "  MSFT:*_*_*_CC_FLAGS = /wd4706\n"
 
 class RedfishCSEdk2:
     def __init__ (self, RedfishCSInstance, SchemaFileInstance, RedfishCSStructList, StructureName, StructureMemberDataType, NonStructureMemberDataType, GenCS_Cfiles, OutputDir):
@@ -133,16 +126,16 @@ class RedfishCSEdk2:
             PrefixForwardDir = "../"
 
         self.RedfishSchemaFile.Edk2IncludeFileText = HPECopyright + "\n"
-        self.RedfishSchemaFile.Edk2IncludeFileText += ("#ifndef " + "_EFI_" + REDFISH_STRUCT_NAME_HEAD.upper() + \
+        self.RedfishSchemaFile.Edk2IncludeFileText += ("#ifndef " + "EFI_" + REDFISH_STRUCT_NAME_HEAD.upper() + \
                             RedfishCs.ResourceType.upper() + \
                             SchemaVersion + \
                             "_" + "CSTRUCT_H_" + "\n")
-        self.RedfishSchemaFile.Edk2IncludeFileText += ("#define " + "_EFI_" + REDFISH_STRUCT_NAME_HEAD.upper() + \
+        self.RedfishSchemaFile.Edk2IncludeFileText += ("#define " + "EFI_" + REDFISH_STRUCT_NAME_HEAD.upper() + \
                             RedfishCs.ResourceType.upper() + \
                             SchemaVersion + \
                             "_" + "CSTRUCT_H_" + "\n")
         self.RedfishSchemaFile.Edk2IncludeFileText += "\n"
-        self.RedfishSchemaFile.Edk2IncludeFileText += "#include \"" + PrefixForwardDir + "../RedfishDataTypeDef.h\"\n"
+        self.RedfishSchemaFile.Edk2IncludeFileText += "#include \"" + PrefixForwardDir + "../../include/RedfishDataTypeDef.h\"\n"
         self.RedfishSchemaFile.Edk2IncludeFileText += "#include \"" + PrefixForwardDir + "../../include/" + self.CSCFilesInstance.CIncludeFileName + "\"\n"
 
         Edk2CsType = "EFI_REDFISH_" + self.CSCFilesInstance.CRedfishRootStrucutreResrouceType.upper() + SchemaVersion + "_CS"
@@ -247,7 +240,7 @@ class RedfishCSEdk2:
     def GenEdk2RedfishIntpFile(self):
         RedfishCs = self.RedfishCsList        
         RedfishCsInterpreter_Include_Dir = self.Edk2RedfishIntpOutputDir + os.path.normpath("/Include/RedfishJsonStructure/" + self.Edk2CsIncludeFileRelativePath)
-        RedfishCsInterpreter_Source_Dir = self.Edk2RedfishIntpOutputDir + os.path.normpath("/RedfishJsonStructure")
+        RedfishCsInterpreter_Source_Dir = self.Edk2RedfishIntpOutputDir + os.path.normpath("/Converter")
         if not os.path.exists (self.Edk2RedfishIntpOutputDir):                
             os.makedirs(RedfishCsInterpreter_Include_Dir)
             os.makedirs(RedfishCsInterpreter_Source_Dir)
@@ -280,11 +273,11 @@ class RedfishCSEdk2:
             os.makedirs(RedfishCsInterpreter_Include_Dir)          
 
         if SchemaVersion == "":
-            RedfishCsSchemaDxe_C_File = "Redfish" + RedfishCs.ResourceType + "_Dxe.c"
+            RedfishCsSchemaDxe_C_File = RedfishCs.ResourceType + "_Dxe.c"
             RedfishCsSchemaDxe_INF_File = "Redfish" + RedfishCs.ResourceType + "_Dxe.inf"            
             RedfishCsSchemaDxe_INCLUDE_File = "Efi" + RedfishCs.ResourceType + ".h"
         else:
-            RedfishCsSchemaDxe_C_File = "Redfish" + RedfishCs.ResourceType + SchemaVersionCapitalUnderscore + "_Dxe.c"
+            RedfishCsSchemaDxe_C_File = RedfishCs.ResourceType + SchemaVersionCapitalUnderscore + "_Dxe.c"
             RedfishCsSchemaDxe_INF_File = "Redfish" + RedfishCs.ResourceType + SchemaVersionCapitalUnderscore + "_Dxe.inf"
             RedfishCsSchemaDxe_INCLUDE_File = "Efi" + RedfishCs.ResourceType + SchemaVersionCapital + ".h"
 
@@ -357,16 +350,16 @@ class RedfishCSEdk2:
 
         fo = open(self.Edk2RedfishIntpOutputDir + os.path.normpath("/" + self.Edk2RedfishIntpComponentDsc),"a")
         if SchemaVersion == "":
-            fo.write("  " + self.Edk2RedfishJsonCsPackagePath + "RedfishJsonStructure/" + RedfishCs.ResourceType + "/" + RedfishCsSchemaDxe_INF_File + "\n")
+            fo.write("  " + self.Edk2RedfishJsonCsPackagePath + "RedfishClientPkg/Converter/" + RedfishCs.ResourceType + "/" + RedfishCsSchemaDxe_INF_File + "\n")
         else:
-            fo.write("  " + self.Edk2RedfishJsonCsPackagePath + "RedfishJsonStructure/" + RedfishCs.ResourceType + "/" + SchemaVersion + "/" + RedfishCsSchemaDxe_INF_File + "\n")
+            fo.write("  " + self.Edk2RedfishJsonCsPackagePath + "RedfishClientPkg/Converter/" + RedfishCs.ResourceType + "/" + SchemaVersion + "/" + RedfishCsSchemaDxe_INF_File + "\n")
         fo.close()
 
         fo = open(self.Edk2RedfishIntpOutputDir + os.path.normpath("/" + self.Edk2RedfishIntpLibDsc),"a")
         if SchemaVersion == "":
-            fo.write("  " + self.LibClass + "|" + self.Edk2RedfishJsonCsPackagePath + "Library/RedfishCSLib" + Edk2BindingDir + "/" + RedfishCs.ResourceType + "/Lib.inf" + "\n")
+            fo.write("  " + self.LibClass + "|" + self.Edk2RedfishJsonCsPackagePath + "RedfishClientPkg/ConverterLib" + Edk2BindingDir + "/" + RedfishCs.ResourceType + "/Lib.inf" + "\n")
         else:
-            fo.write("  " + self.LibClass + "|" + self.Edk2RedfishJsonCsPackagePath + "Library/RedfishCSLib" + Edk2BindingDir + "/" + RedfishCs.ResourceType + "/" + SchemaVersion + "/Lib.inf" + "\n")
+            fo.write("  " + self.LibClass + "|" + self.Edk2RedfishJsonCsPackagePath + "RedfishClientPkg/ConverterLib" + Edk2BindingDir + "/" + RedfishCs.ResourceType + "/" + SchemaVersion + "/Lib.inf" + "\n")
         fo.close()        
 
         fo = open(os.path.normpath(RedfishCsInterpreter_Source_Schema_dir + "/" + RedfishCsSchemaDxe_C_File),"w")

@@ -1011,8 +1011,8 @@ class RedfishCS_CRelatedFile:
         if SchemaVersion == REDFISH_SCHEMA_NAMING_NOVERSIONED:
             Name = StructureName [ResourceType][SchemaVersion][StrucName][STRUCTURE_NAME_TUPLE_NAME].replace (REDFISH_SCHEMA_NAMING_NOVERSIONED + "_", "")
             if self.RedfishSchemaFile.SchemaRef not in Name: # Add #ifndef for the command strucuture used for different schema, such as RedfishResource_Oem_CS
-                typedef += "#ifndef __"+ Name + "__\n" + \
-                           "#define __"+ Name + "__\n" + \
+                typedef += "#ifndef "+ Name + "_\n" + \
+                           "#define "+ Name + "_\n" + \
                            "typedef struct " + "_" + Name  + " {\n"
             else:
                 typedef += "typedef struct " + "_" + Name  + " {\n"
@@ -1020,8 +1020,8 @@ class RedfishCS_CRelatedFile:
         else:
             Name = StructureName [ResourceType][SchemaVersion][StrucName][STRUCTURE_NAME_TUPLE_NAME]
             if self.RedfishSchemaFile.SchemaRef not in Name: # Add #ifndef for the command strucuture used for different schema, such as RedfishResource_Oem_CS
-                typedef += "#ifndef __"+ Name + "__\n" + \
-                           "#define __"+ Name + "__\n" + \
+                typedef += "#ifndef "+ Name + "_\n" + \
+                           "#define "+ Name + "_\n" + \
                            "typedef struct " + "_" + Name  + " {\n"
             else:     
                 typedef += "typedef struct " + "_" + Name  + " {\n"            
@@ -1156,11 +1156,11 @@ class RedfishCS_CRelatedFile:
         StructureMemberDataType = self.StructureMemberDataType
 
         self.RedfishSchemaFile.CIncludeFileText = HPECopyright + "\n"
-        self.RedfishSchemaFile.CIncludeFileText += ("#ifndef " + "_" + REDFISH_STRUCT_NAME_HEAD + \
+        self.RedfishSchemaFile.CIncludeFileText += ("#ifndef " + REDFISH_STRUCT_NAME_HEAD + \
                             RedfishCs.ResourceType.capitalize() + \
                             "_" + RedfishCs.SchemaVersion.capitalize() + \
                             "_" + "CSTRUCT_H_" + "\n")
-        self.RedfishSchemaFile.CIncludeFileText += ("#define " + "_" + REDFISH_STRUCT_NAME_HEAD + \
+        self.RedfishSchemaFile.CIncludeFileText += ("#define " + REDFISH_STRUCT_NAME_HEAD + \
                             RedfishCs.ResourceType.capitalize() + \
                             "_" + RedfishCs.SchemaVersion.capitalize() + \
                             "_" + "CSTRUCT_H_" + "\n")
@@ -1182,7 +1182,7 @@ class RedfishCS_CRelatedFile:
                         TypedefSturctName = REDFISH_STRUCT_NAME_HEAD + ResourceTypeLoop + "_" + SchemaVersionLoop + "_" + StrucName + REDFISH_STRUCT_NAME_TAIL
 
                     if self.RedfishSchemaFile.SchemaRef not in typedef: # Add #ifndef for the command strucuture used for different schema, such as RedfishResource_Oem_CS
-                        typedef = "#ifndef __"+ TypedefSturctName + "__\n" + typedef + "#endif\n\n"
+                        typedef = "#ifndef "+ TypedefSturctName + "_\n" + typedef + "#endif\n\n"
 
                     self.RedfishSchemaFile.CIncludeFileText += typedef
 
@@ -1222,8 +1222,8 @@ class RedfishCS_CRelatedFile:
                     NewStructName  = self.ArrayStructMember [ResourceTypeLoop][SchemaVersionLoop][KeyLoop][0]
                     if NewStructName not in ArrayStructAdded:
                         if "Redfish" + self.RedfishSchemaFile.ResourceType not in NewStructName: # Check if this is schema-specific array.
-                            self.RedfishSchemaFile.CIncludeFileText += "#ifndef __"+ NewStructName + "__\n" + \
-                           "#define __"+ NewStructName + "__\n"                        
+                            self.RedfishSchemaFile.CIncludeFileText += "#ifndef "+ NewStructName + "_\n" + \
+                           "#define "+ NewStructName + "_\n"                        
                         
                         self.RedfishSchemaFile.CIncludeFileText += "typedef struct " + "_" + NewStructName + " " + " {\n"
                         self.RedfishSchemaFile.CIncludeFileText += "    " + NewStructName + "    *Next;\n"
@@ -1234,7 +1234,7 @@ class RedfishCS_CRelatedFile:
                         self.RedfishSchemaFile.CIncludeFileText += "\n"
 
                         if "Redfish" + self.RedfishSchemaFile.ResourceType not in NewStructName: # Check if this is schema-specific array.
-                            NewInsertforwardTypedef += "#ifndef __"+ NewStructName + "__\n"
+                            NewInsertforwardTypedef += "#ifndef "+ NewStructName + "_\n"
 
                         NewInsertforwardTypedef += "typedef struct _" + NewStructName + " " + NewStructName + ";\n"
 
