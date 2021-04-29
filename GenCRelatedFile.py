@@ -35,15 +35,17 @@ from RedfishCSDef import LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME
 from RedfishCSDef import LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME_DATATYPE
 from RedfishCSDef import LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME_JSON_KEY
 from RedfishCSDef import LOGFOR_CSTRUCTURE_TO_JSON_ALIAS_STRUCTURE_NAME
+from RedfishCSDef import LOGFOR_CSTRUCTURE_TO_JSON_RESOURCETYPE
+from RedfishCSDef import LOGFOR_CSTRUCTURE_TO_JSON_VERSION
 
 HPECopyright  = "//\n" \
                 "// Auto-generated file by Redfish Schema C Structure Generator.\n" + \
                 "// https://github.com/DMTF/Redfish-Schema-C-Struct-Generator.\n" + \
                 "//\n" + \
-                "//  (C) Copyright 2019 Hewlett Packard Enterprise Development LP<BR>\n" + \
+                "//  (C) Copyright 2019-2021 Hewlett Packard Enterprise Development LP<BR>\n" + \
                 "//\n" + \
                 "// Copyright Notice:\n" + \
-                "// Copyright 2020 Distributed Management Task Force, Inc. All rights reserved.\n" + \
+                "// Copyright 2019-2021 Distributed Management Task Force, Inc. All rights reserved.\n" + \
                 "// License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/master/LICENSE.md\n" +\
                 "//\n"
 
@@ -716,6 +718,7 @@ class RedfishCS_CRelatedFile:
                 if strToRet == "RedfishCS_Link":
                     return strToRet, IS_REDFISH_CS_LINK_ARRAY # Dont need arry structure for RedfishCS_Link               
 
+                # ARRAY_CS replaces _CS at the end of structure name type
                 if REDFISH_STRUCT_NAME_TAIL in strToRet:
                     NewMemName = strToRet.replace(REDFISH_STRUCT_NAME_TAIL, "") + REDFISH_ARRAY_CS_TAIL
                 else:
@@ -741,16 +744,30 @@ class RedfishCS_CRelatedFile:
         return strToRet
 
     # This is the preparation for CSTructure to JSON function.
-    def LogCStructureToJson (self, StrucName, StructMemDataType, JsonKey, StructureMemberName, IsRoot, IsRedfishCsLinkArray, AliasStructName):
+    def LogCStructureToJson (self, StrucName, StructMemDataType, JsonKey, StructureMemberName, IsRoot, IsRedfishCsLinkArray, AliasStructName, ResourceType, Version):
+        UseAliasName = False
         if StrucName not in self.LogForCStructureToJson:
-            self.LogForCStructureToJson [StrucName] = (IsRoot, IsRedfishCsLinkArray, {}, AliasStructName)
+            self.LogForCStructureToJson [StrucName] = (IsRoot, IsRedfishCsLinkArray, {}, AliasStructName, ResourceType, Version)
+        else:       
+            # check if same name but differnt namespace            
+            if ResourceType != self.LogForCStructureToJson [StrucName][LOGFOR_CSTRUCTURE_TO_JSON_RESOURCETYPE] or  Version != self.LogForCStructureToJson [StrucName][LOGFOR_CSTRUCTURE_TO_JSON_VERSION]:
+                # Same StrucName but differnt namespace, use AliasStructName as StrucName and StrucName as AliasStructName
+                # so it can be found in GenCStructToJsonCCodeForStructure method.
+                self.LogForCStructureToJson [AliasStructName] = (IsRoot, IsRedfishCsLinkArray, {}, StrucName, ResourceType, Version)
+                UseAliasName = True
 
         #if StructureMemberName not in self.LogForCStructureToJson [StrucName][2]:
         #    self.LogForCStructureToJson [StrucName][2][StructureMemberName] = 
         if IsRedfishCsLinkArray:
-            self.LogForCStructureToJson [StrucName] [LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME] [StructureMemberName] = (StructMemDataType + "_Array", JsonKey)
+            if UseAliasName != True:
+                self.LogForCStructureToJson [StrucName] [LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME] [StructureMemberName] = (StructMemDataType + "_Array", JsonKey)
+            else:
+                self.LogForCStructureToJson [AliasStructName] [LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME] [StructureMemberName] = (StructMemDataType + "_Array", JsonKey)
         else:
-            self.LogForCStructureToJson [StrucName] [LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME] [StructureMemberName] = (StructMemDataType, JsonKey)
+            if UseAliasName != True:            
+                self.LogForCStructureToJson [StrucName] [LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME] [StructureMemberName] = (StructMemDataType, JsonKey)
+            else:
+                self.LogForCStructureToJson [AliasStructName] [LOGFOR_CSTRUCTURE_TO_JSON_IS_STRUCT_MEM_NAME] [StructureMemberName] = (StructMemDataType, JsonKey)
 
     def GenCStructureJSonStructureCode (self, ResourceType, SchemaVersion, StructureMemberDataType, NestedStructName, key, PrecedentKey, CStructPointer):
         StructnameShort = StructureMemberDataType.replace (REDFISH_STRUCT_NAME_HEAD + ResourceType + "_", "")
@@ -927,6 +944,19 @@ class RedfishCS_CRelatedFile:
                                 NewNestedStructName = StructureNameRef
                             else:
                                 NewNestedStructName = NestedStructName + "_" + StructureNameRef
+                                                                                                           
+                            #if key in self.LogForCStructureToJson:
+                            #    NewResourceType = self.LogForCStructureToJson[key][LOGFOR_CSTRUCTURE_TO_JSON_RESOURCETYPE]
+                            #    NewResourceVersion = self.LogForCStructureToJson[key][LOGFOR_CSTRUCTURE_TO_JSON_VERSION]
+                            #    if NewResourceType != "" and NewResourceVersion != "":                                  
+                            #        ResourceType = NewResourceType
+                            #        SchemaVersion = NewResourceVersion
+                            #else:
+                            if self.LogForCStructureToJson[StructureNameRef][LOGFOR_CSTRUCTURE_TO_JSON_RESOURCETYPE] == "" or self.LogForCStructureToJson[StructureNameRef][LOGFOR_CSTRUCTURE_TO_JSON_VERSION] == "":
+                                print ("Array structure has no schema ResourceType or ResourceVersion")
+                                sys.exit()
+                            ResourceType = self.LogForCStructureToJson[StructureNameRef][LOGFOR_CSTRUCTURE_TO_JSON_RESOURCETYPE]
+                            SchemaVersion = self.LogForCStructureToJson[StructureNameRef][LOGFOR_CSTRUCTURE_TO_JSON_VERSION]
                             self.GenCStructureJSonStructureCode (ResourceType, SchemaVersion, StructureMemberDataType, NewNestedStructName, StructureMemberNameKey, PrecedentKey + StructureMemberNameKey, CStructPointer)
                             StructureFound = True
                             raise BreakForLoop
@@ -1040,8 +1070,23 @@ class RedfishCS_CRelatedFile:
                         StructNameOrg = StructureName [ResourceType][SchemaVersion][StrucName][STRUCTURE_NAME_TUPLE_NAME]
                         StructNameOrg = StructNameOrg.replace (SchemaVersion + "_", "")
                         StructNameOrg = StructNameOrg.replace (REDFISH_STRUCT_NAME_TAIL, "")
-                        #self.LogCStructureToJson (StructNameOrg, StructMemDataType, JsonKey, Member,  IsRoot, IsRedfishCsLinkArray)
-                        self.LogCStructureToJson (StrucName, StructMemDataType, JsonKey, Member,  IsRoot, IsRedfishCsLinkArray, StructNameOrg)
+
+                        # Record resource tyep and version
+                        Pattern = re.compile ('[_]*[vV]*[0-9]+[_]{1}[0-9]+[_]{1}[0-9]+[_]*', 0)
+                        keyResourceAndVersion_Resource = ""
+                        keyResourceAndVersion_Version = ""
+                        if re.search (Pattern, key) != None:
+                            keyResourceAndVersion_Version = re.findall (Pattern, key)[0]
+                            keyResourceAndVersion = key.split (keyResourceAndVersion_Version)
+                            keyResourceAndVersion_Version = keyResourceAndVersion_Version.lstrip('_')
+                            keyResourceAndVersion_Version = keyResourceAndVersion_Version.rstrip('_')                            
+                            keyResourceAndVersion_Resource = keyResourceAndVersion[0]                            
+                        elif REDFISH_SCHEMA_NAMING_NOVERSIONED in key:                  
+                            keyResourceAndVersion = key.split ('_' + REDFISH_SCHEMA_NAMING_NOVERSIONED + '_')
+                            keyResourceAndVersion_Resource = keyResourceAndVersion[0]
+                            keyResourceAndVersion_Version = REDFISH_SCHEMA_NAMING_NOVERSIONED                     
+
+                        self.LogCStructureToJson (StrucName, StructMemDataType, JsonKey, Member,  IsRoot, IsRedfishCsLinkArray, StructNameOrg, keyResourceAndVersion_Resource, keyResourceAndVersion_Version)
 
                         if MaxStrucDataTypeLen > len (StructMemDataType):
                             spaces = MaxStrucDataTypeLen - len (StructMemDataType)

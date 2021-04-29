@@ -811,7 +811,7 @@ Edk2RedfishJsonCsPackagePath = "RedfishCsIntpPkg"
 #JsonFileIo.close()
 # Test Redfish property
 
-print ("\n\nHPE Redfish Schema to C Structure Generator Copyrights 2018-2019 v1.1")
+print ("\n\nHPE Redfish Schema to C Structure Generator Copyrights 2018-2021 v1.2_schema2020.4")
 
 if "-logfile" in sys.argv:
     ToolLogInformation = ToolLogger.ToolLog (TOOL_LOG_TO_FILE, "RedfishCs.log")
