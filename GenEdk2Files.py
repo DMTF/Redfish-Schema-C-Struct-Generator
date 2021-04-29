@@ -138,7 +138,7 @@ class RedfishCSEdk2:
         self.RedfishSchemaFile.Edk2IncludeFileText += "#include \"" + PrefixForwardDir + "../../include/RedfishDataTypeDef.h\"\n"
         self.RedfishSchemaFile.Edk2IncludeFileText += "#include \"" + PrefixForwardDir + "../../include/" + self.CSCFilesInstance.CIncludeFileName + "\"\n"
 
-        Edk2CsType = "EFI_REDFISH_" + self.CSCFilesInstance.CRedfishRootStrucutreResrouceType.upper() + SchemaVersion + "_CS"
+        Edk2CsType = "EFI_REDFISH_" + self.CSCFilesInstance.CRedfishRootStrucutreResrouceType.upper() + SchemaVersion + REDFISH_STRUCT_NAME_TAIL
         self.Edk2CStructureName = Edk2CsType
         self.RedfishSchemaFile.Edk2IncludeFileText += "\n"
         self.RedfishSchemaFile.Edk2IncludeFileText += "typedef " + self.CSCFilesInstance.CRedfishRootStructureName + " " + Edk2CsType + ";\n"

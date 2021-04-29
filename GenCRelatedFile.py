@@ -361,6 +361,24 @@ class RedfishCS_CRelatedFile:
         
         return ""        
          
+    def RemoveTailCSPattern (self, Content):
+        Pattern = REDFISH_STRUCT_NAME_TAIL + " "
+        Found = re.search (Pattern, Content)
+        if Found != None:
+            ContentSplit = Content.split (Pattern)
+            NewContent = ContentSplit[0] + " " + ContentSplit[1] 
+            return NewContent
+        Pattern = REDFISH_STRUCT_NAME_TAIL + "$"
+        Found = re.search (Pattern, Content)
+        if Found != None:
+            NewContent = Content.rstrip (REDFISH_STRUCT_NAME_TAIL)
+            return NewContent
+        Pattern = REDFISH_STRUCT_NAME_TAIL + "[A-za-Z0-9]+"
+        if Found != None:
+            Content = Content
+            return Content        
+        Content = Content
+        return Content    
 
     def CCodeGenStructArrayElementFuncNameCode (self, StructureMemberDataType, ResourceType, SchemaVersion, TypeName, key, StructArrayMemDataType, StrucName, GenElementFunc, IsRootStruc):
         if IsRootStruc:
@@ -371,7 +389,7 @@ class RedfishCS_CRelatedFile:
             StrucPtr = "&(*Dst)->"
 
         StrFunText = ""
-        StructArrayMemDataTypeName = StructArrayMemDataType.replace("_Array_CS", "_CS")
+        StructArrayMemDataTypeName = StructArrayMemDataType.replace("_Array_CS", REDFISH_STRUCT_NAME_TAIL)
         StrFunText += "static RedfishCS_status " + GenElementFunc + "(" + self.CRedfishRootStructureName + " *Cs, json_t *JsonObj, RedfishCS_uint64 Index,  " + \
                      StructArrayMemDataTypeName + " **Dst)\n{\n" + \
                      C_SRC_TAB_SPACE + "RedfishCS_status Status;\n" + \
@@ -476,8 +494,8 @@ class RedfishCS_CRelatedFile:
             JsonPtr = "TempJsonObj"
             StrucPtr = "&(*Dst)->"
 
-        #StructFuncName = StructArrayMemDataType.replace (REDFISH_STRUCT_NAME_HEAD, "").replace (REDFISH_STRUCT_NAME_TAIL, "")
-        StructFuncName = self.RemoveStructureNameHead (StructArrayMemDataType).replace (REDFISH_STRUCT_NAME_TAIL, "")
+        #StructFuncName = self.RemoveStructureNameHead (StructArrayMemDataType).rstrip(REDFISH_STRUCT_NAME_TAIL)
+        StructFuncName = self.RemoveTailCSPattern (self.RemoveStructureNameHead (StructArrayMemDataType))
 
         StructFuncName = StructFuncName.replace (ResourceType + "_", "").replace (SchemaVersion + "_", "")
         StrFunText = C_SRC_TAB_SPACE + "Status = Gen" + StructFuncName + "Cs (Cs, " + JsonPtr + ", \"" +\
@@ -496,8 +514,8 @@ class RedfishCS_CRelatedFile:
             JsonPtr = "TempJsonObj"
             StrucPtr = "&(*Dst)->"
 
-        #StructFuncName = StructureMemberDataType[StructDataTypeKey][STRUCTURE_MEMBER_TUPLE_DATATYPE].replace (REDFISH_STRUCT_NAME_HEAD, "").replace (REDFISH_STRUCT_NAME_TAIL, "")
-        StructFuncName = self.RemoveStructureNameHead (StructureMemberDataType[StructDataTypeKey][STRUCTURE_MEMBER_TUPLE_DATATYPE]).replace(REDFISH_STRUCT_NAME_TAIL, "")
+        #StructFuncName = self.RemoveStructureNameHead (StructureMemberDataType[StructDataTypeKey][STRUCTURE_MEMBER_TUPLE_DATATYPE]).rstrip(REDFISH_STRUCT_NAME_TAIL)
+        StructFuncName = self.RemoveTailCSPattern (self.RemoveStructureNameHead (StructureMemberDataType[StructDataTypeKey][STRUCTURE_MEMBER_TUPLE_DATATYPE]))
         StructFuncName = StructFuncName.replace(ResourceType + "_", "").replace (SchemaVersion + "_", "").replace (TypeName + "_", "").replace (" *", "")
         # Check if funciton name already exist.
         NewFuncName = "Gen" + StructFuncName + "Cs"
@@ -732,7 +750,8 @@ class RedfishCS_CRelatedFile:
 
                 # ARRAY_CS replaces _CS at the end of structure name type
                 if REDFISH_STRUCT_NAME_TAIL in strToRet:
-                    NewMemName = strToRet.replace(REDFISH_STRUCT_NAME_TAIL, "") + REDFISH_ARRAY_CS_TAIL
+                    #NewMemName = strToRet.rstrip(REDFISH_STRUCT_NAME_TAIL) + REDFISH_ARRAY_CS_TAIL
+                    NewMemName = self.RemoveTailCSPattern (strToRet) + REDFISH_ARRAY_CS_TAIL
                 else:
                     NewMemName = strToRet + "_Array"
                     if NewMemName not in self.CCodeGenJsonNaturalArrayFun:
@@ -783,7 +802,8 @@ class RedfishCS_CRelatedFile:
 
     def GenCStructureJSonStructureCode (self, ResourceType, SchemaVersion, StructureMemberDataType, NestedStructName, key, PrecedentKey, CStructPointer):
         StructnameShort = StructureMemberDataType.replace (REDFISH_STRUCT_NAME_HEAD + ResourceType + "_", "")
-        StructnameShort = StructnameShort.replace(REDFISH_STRUCT_NAME_TAIL, "")
+        #StructnameShort = StructnameShort.rstrip(REDFISH_STRUCT_NAME_TAIL)
+        StructnameShort = self.RemoveTailCSPattern (StructnameShort)
         if SchemaVersion == REDFISH_SCHEMA_NAMING_NOVERSIONED:
             StructnameShort = StructnameShort.replace(SchemaVersion + "_", "")
 
@@ -820,7 +840,8 @@ class RedfishCS_CRelatedFile:
 
     def GenCStructureJSonStructureArrayCode (self, ResourceType, SchemaVersion, StructureMemberDataType, NestedStructName, ArrayStructWrapperName, key, PrecedentKey, CStructPointer):
         StructnameShort = StructureMemberDataType.replace (REDFISH_STRUCT_NAME_HEAD + ResourceType + "_", "")
-        StructnameShort = StructnameShort.replace(REDFISH_STRUCT_NAME_TAIL, "")
+        #StructnameShort = StructnameShort.rstrip(REDFISH_STRUCT_NAME_TAIL)
+        StructnameShort = self.RemoveTailCSPattern (StructnameShort)
         if SchemaVersion != REDFISH_SCHEMA_NAMING_NOVERSIONED:
             StructnameShort = StructnameShort.replace(SchemaVersion + "_", "")
 
@@ -1028,7 +1049,8 @@ class RedfishCS_CRelatedFile:
 
         #StructMemHead = StructureName [ResourceType][SchemaVersion][StrucName][STRUCTURE_NAME_TUPLE_NAME].replace (REDFISH_STRUCT_NAME_HEAD, "")
         StructMemHead = self.RemoveStructureNameHead (StructureName [ResourceType][SchemaVersion][StrucName][STRUCTURE_NAME_TUPLE_NAME])
-        StructMemHead = StructMemHead.replace(REDFISH_STRUCT_NAME_TAIL, "")
+        #StructMemHead = StructMemHead.rstrip(REDFISH_STRUCT_NAME_TAIL)
+        StructMemHead = self.RemoveTailCSPattern (StructMemHead)
 
         # Loop to see the maximum length of structure member data type string for the code cosmetics.
         for key in sorted (StructureMemberDataType.keys ()):
@@ -1081,7 +1103,8 @@ class RedfishCS_CRelatedFile:
                         # Log member information for CStructure to JSON function.
                         StructNameOrg = StructureName [ResourceType][SchemaVersion][StrucName][STRUCTURE_NAME_TUPLE_NAME]
                         StructNameOrg = StructNameOrg.replace (SchemaVersion + "_", "")
-                        StructNameOrg = StructNameOrg.replace (REDFISH_STRUCT_NAME_TAIL, "")
+                        #StructNameOrg = StructNameOrg.rstrip (REDFISH_STRUCT_NAME_TAIL)
+                        StructNameOrg = self.RemoveTailCSPattern (StructNameOrg)
 
                         # Record resource tyep and version
                         Pattern = re.compile ('[_]*[vV]*[0-9]+[_]{1}[0-9]+[_]{1}[0-9]+[_]*', 0)
@@ -1259,9 +1282,9 @@ class RedfishCS_CRelatedFile:
         self.RedfishSchemaFile.CIncludeFileText += ToJsonFunName  + " (" + StructPointerName + " *CSPtr, char **JsonText);\n\n"
 
         if RedfishCs.SchemaVersion == REDFISH_SCHEMA_NAMING_NOVERSIONED:
-            DestoryFunName = "Destroy" + RedfishCs.ResourceType + "_CS"
+            DestoryFunName = "Destroy" + RedfishCs.ResourceType + REDFISH_STRUCT_NAME_TAIL
         else:
-            DestoryFunName = "Destroy" + RedfishCs.ResourceType + "_" + RedfishCs.SchemaVersion + "_CS"
+            DestoryFunName = "Destroy" + RedfishCs.ResourceType + "_" + RedfishCs.SchemaVersion + REDFISH_STRUCT_NAME_TAIL
         self.RedfishSchemaFile.CIncludeFileText += "RedfishCS_status\n"
         self.RedfishSchemaFile.CIncludeFileText += DestoryFunName  + " (" + StructPointerName + " *CSPtr);\n\n"             
 
@@ -1348,7 +1371,8 @@ class RedfishCS_CRelatedFile:
             # No member found, means the properties for this data type is "{}"
             return self.CCodeEmptyProp (IsArrayElement), True
 
-        StructMemHead = StructMemHead.replace(REDFISH_STRUCT_NAME_TAIL, "")
+        #StructMemHead = StructMemHead.rstrip(REDFISH_STRUCT_NAME_TAIL)
+        StructMemHead = self.RemoveTailCSPattern (StructMemHead)
         CodeGenerated = ""
         MemberFound = False
         for key in sorted (StructureMemberDataType.keys ()):
@@ -1391,8 +1415,8 @@ class RedfishCS_CRelatedFile:
                                         except BreakForLoop:
                                             pass                                                    
 
-                                #StructDataType = StructMemDataType.replace (REDFISH_STRUCT_NAME_HEAD, "").replace(REDFISH_STRUCT_NAME_TAIL, "")
-                                StructDataType = self.RemoveStructureNameHead (StructMemDataType).replace(REDFISH_STRUCT_NAME_TAIL, "")
+                                #StructDataType = self.RemoveStructureNameHead (StructMemDataType).rstrip(REDFISH_STRUCT_NAME_TAIL)
+                                StructDataType = self.RemoveTailCSPattern (self.RemoveStructureNameHead (StructMemDataType))
                                 NewResourceType = StructDataType.split('_')[0]
                                 if REDFISH_SCHEMA_NAMING_NOVERSIONED in StructureMemberDataType [key][STRUCTURE_MEMBER_TUPLE_DATATYPE]:
                                     NewSchemaVersion = REDFISH_SCHEMA_NAMING_NOVERSIONED
