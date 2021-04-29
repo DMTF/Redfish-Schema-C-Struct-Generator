@@ -104,6 +104,7 @@ StructureMemberDataType = {}
 
 NonStructureMemberDataType = {}
 ExternResourceType = {}
+CFuctionsCreated = {}
 
 def PrintMessage (Level, Message):
     if VerboseOn:
@@ -581,7 +582,9 @@ class GenRedfishSchemaCs:
         if StructureMemberDataType != {}:            
             StructureMemberDataType.clear()
         if NonStructureMemberDataType != {}:       
-            NonStructureMemberDataType.clear()           
+            NonStructureMemberDataType.clear()
+        if CFuctionsCreated != {}:
+            CFuctionsCreated.clear()           
 
     def GenerateCS (self):
         SchemaFile = RedfishSchemaFile(self, self.File)
@@ -606,7 +609,7 @@ class GenRedfishSchemaCs:
                 RedfishCs.GenStructureMemberPass2 () # Handle "NEED_2ND_PHASE" strucutre member.
 
                 # Generate C include file
-                GenCS_Cfiles = RedfishCS_CRelatedFile (self, SchemaFile, RedfishCs, StructureName, StructureMemberDataType, NonStructureMemberDataType)
+                GenCS_Cfiles = RedfishCS_CRelatedFile (self, SchemaFile, RedfishCs, StructureName, StructureMemberDataType, NonStructureMemberDataType, CFuctionsCreated)
                 GenCS_Cfiles.GenCSIncludefile ()
                 GenCS_Cfiles.GenCSCfile ()
 

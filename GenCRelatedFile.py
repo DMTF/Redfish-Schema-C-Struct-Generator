@@ -499,13 +499,24 @@ class RedfishCS_CRelatedFile:
         #StructFuncName = StructureMemberDataType[StructDataTypeKey][STRUCTURE_MEMBER_TUPLE_DATATYPE].replace (REDFISH_STRUCT_NAME_HEAD, "").replace (REDFISH_STRUCT_NAME_TAIL, "")
         StructFuncName = self.RemoveStructureNameHead (StructureMemberDataType[StructDataTypeKey][STRUCTURE_MEMBER_TUPLE_DATATYPE]).replace(REDFISH_STRUCT_NAME_TAIL, "")
         StructFuncName = StructFuncName.replace(ResourceType + "_", "").replace (SchemaVersion + "_", "").replace (TypeName + "_", "").replace (" *", "")
-        StrFunText = C_SRC_TAB_SPACE + "Status = Gen" + StructFuncName + "Cs (Cs, " + JsonPtr + ", \"" +\
+        # Check if funciton name already exist.
+        NewFuncName = "Gen" + StructFuncName + "Cs"
+        if NewFuncName in self.CfunctionsCreated:
+            # [0] : Schema name
+            # [1] : Schema version
+            # [2] : Instance of the duplication
+            if self.CfunctionsCreated[NewFuncName][0] != ResourceType or self.CfunctionsCreated[NewFuncName][1] != SchemaVersion:
+                self.CfunctionsCreated[NewFuncName][2] = self.CfunctionsCreated[NewFuncName][2] + 1
+                NewFuncName = "Gen" + StructFuncName + "_" + str(self.CfunctionsCreated[NewFuncName][2]) + "_" + "Cs"
+
+        #StrFunText = C_SRC_TAB_SPACE + "Status = Gen" + StructFuncName + "Cs (Cs, " + JsonPtr + ", \"" +\
+        StrFunText = C_SRC_TAB_SPACE + "Status = " + NewFuncName + " (Cs, " + JsonPtr + ", \"" +\
                      StructureMemberDataType[StructDataTypeKey][STRUCTURE_MEMBER_TUPLE_ORG_KEY_NAME] + "\", " + StrucPtr + \
                      Member + ");\n"
         StrFunText += C_SRC_TAB_SPACE + "if (Status != RedfishCS_status_success && Status != RedfishCS_status_not_found) {goto Error;}\n"+\
                       C_SRC_TAB_SPACE + "else {if (Status == RedfishCS_status_not_found)" + "{" + self.IsKeyRequiredError(StructureMemberDataType, StructDataTypeKey, Member, IsRootStruc) + "}}\n\n"
-                          
-        return StrFunText, "Gen" + StructFuncName + "Cs"
+        #return StrFunText, "Gen" + StructFuncName + "Cs"
+        return StrFunText, NewFuncName
 
     def CCodeGenStructArrayFuncNameCode(self, StructureMemberDataType, ResourceType, SchemaVersion, TypeName, key, StructArrayMemDataType, StrucName, FuncName, IsRootStruc):                      
         if FuncName in self.StructFuncName:
@@ -631,7 +642,7 @@ class RedfishCS_CRelatedFile:
 
         return FuncText
 
-    def __init__ (self, RedfishCSInstance, SchemaFileInstance, RedfishCSStructList, StructureName, StructureMemberDataType, NonStructureMemberDataType):
+    def __init__ (self, RedfishCSInstance, SchemaFileInstance, RedfishCSStructList, StructureName, StructureMemberDataType, NonStructureMemberDataType, CfunctionsCreated):
         self.GenRedfishSchemaCs = RedfishCSInstance
         self.RedfishSchemaFile = SchemaFileInstance
         self.RedfishCsList = RedfishCSStructList
@@ -639,6 +650,7 @@ class RedfishCS_CRelatedFile:
         self.StructureMemberDataType = StructureMemberDataType
         self.NonStructureMemberDataType = NonStructureMemberDataType        
         self.ArrayStructMember = {}
+        self.CfunctionsCreated = CfunctionsCreated
 
         # 
         # LOGFOR_CSTRUCTURE_TO_JSON_IS_ROOT = 0
@@ -1395,6 +1407,16 @@ class RedfishCS_CRelatedFile:
                                 else:
                                     FuncText, FuncName = self.CCodeGenCallStructFunName (NewResourceType, NewSchemaVersion, NewTypeName, StructureMemberDataType, key, Member, IsRootStruc)                                        
                                 CodeGenerated += FuncText
+                                # Log C functions created
+                                # [0] : Schema name
+                                # [1] : Schema version
+                                # [2] : Instance of the duplication
+                                if FuncName in self.CfunctionsCreated:
+                                    if self.CfunctionsCreated [FuncName][0] != NewResourceType or self.CfunctionsCreated [FuncName][1] != NewSchemaVersion:
+                                        print("***ERROR*** Duplicated function is created: " + FuncName + " in " + NewResourceType + NewSchemaVersion + "\n")
+                                        sys.exit()
+                                else:
+                                    self.CfunctionsCreated [FuncName] = [NewResourceType, NewSchemaVersion, 0]
 
                                 if IsArrayStruct:
                                     self.CCodeGenStructArrayFuncNameCode (StructureMemberDataType, NewResourceType, NewSchemaVersion, NewTypeName, key, StructArrayMemDataType, StrucName + "_" + Member, FuncName, IsRootStruc)                                    
