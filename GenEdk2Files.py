@@ -27,8 +27,13 @@ HPECopyright  = "//\n" \
                 "// https://github.com/DMTF/Redfish-Schema-C-Struct-Generator.\n" + \
                 "//\n" + \
                 "//  (C) Copyright 2019-2021 Hewlett Packard Enterprise Development LP<BR>\n" + \
-                "//\n" + \
                 "//  SPDX-License-Identifier: BSD-2-Clause-Patent\n" + \
+                "//\n" + \
+                "// Auto-generated file by Redfish Schema C Structure Generator.\n" + \
+                "// https://github.com/DMTF/Redfish-Schema-C-Struct-Generator.\n" + \
+                "// Copyright Notice:\n" + \
+                "// Copyright 2019-2021 Distributed Management Task Force, Inc. All rights reserved.\n" + \
+                "// License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/master/LICENSE.md\n" + \
                 "//\n"
 
 DMTFCopyright = "//----------------------------------------------------------------------------\n" + \
@@ -38,12 +43,14 @@ DMTFCopyright = "//-------------------------------------------------------------
                 "//----------------------------------------------------------------------------\n"
 
 Edk2InfFileCopyright = "#\n" + \
+                       "#  (C) Copyright 2019-2021 Hewlett Packard Enterprise Development LP<BR>\n" + \
+                       "#  SPDX-License-Identifier: BSD-2-Clause-Patent\n" + \
+                       "#\n" + \
                        "# Auto-generated file by Redfish Schema C Structure Generator.\n" + \
                        "# https://github.com/DMTF/Redfish-Schema-C-Struct-Generator.\n" + \
-                       "#\n" + \
-                       "#  (C) Copyright 2019-2021 Hewlett Packard Enterprise Development LP<BR>\n" + \
-                       "#\n" + \
-                       "#  SPDX-License-Identifier: BSD-2-Clause-Patent\n" + \
+                       "# Copyright Notice:\n" + \
+                       "# Copyright 2019-2021 Distributed Management Task Force, Inc. All rights reserved.\n" + \
+                       "# License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/master/LICENSE.md\n" + \
                        "#\n"
 
 Edk2InfFileTemp = "[Defines]\n" + \

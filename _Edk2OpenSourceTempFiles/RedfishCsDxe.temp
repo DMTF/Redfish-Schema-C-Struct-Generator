@@ -1,15 +1,17 @@
-/** @file
-   
-  The implementation of EFI Redfish Interpreter DXE driver for below
+/** @file 
+  The implementation of EFI Redfish JSON Structure DXE driver for below
   Redfish schema.
    - !**RESOURCE_TYPE**!.!**SCHEMA_VERSION**! 
 
-  (C) Copyright 2018 Hewlett Packard Enterprise Development LP<BR>
-  This software contains information confidential and proprietary to
-  Hewlett Packard Enterprise. It shall not be reproduced in whole or in part,
-  or transferred to other documents, or disclosed to third parties, or used
-  for any purpose other than that for which it was obtained without the prior
-  written consent of Hewlett Packard Enterprise.
+  (C) Copyright 2019-2021 Hewlett Packard Enterprise Development LP<BR>
+  SPDX-License-Identifier: BSD-2-Clause-Patent
+
+  Auto-generated file by Redfish Schema C Structure Generator.
+  https://github.com/DMTF/Redfish-Schema-C-Struct-Generator
+  
+  Copyright Notice:
+  Copyright 2019-2021 Distributed Management Task Force, Inc. All rights reserved.
+  License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/master/LICENSE.md d
 
 **/
 #include <Uefi.h>
@@ -20,19 +22,18 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 
-#include <Protocol/RestResourceInterpreter.h>
+#include <Protocol/RestJsonStructure.h>
 
-#include <Library/HpStringUtilLib.h>
 #include <jansson.h>
 //
-// EFI Redfish Resource Type IDentifier.
+// EFI Redfish Resource Type Identifier.
 //
-#include <RedfishInterpreter/!**EDK2_REDFISH_CS_RELATIVE_PATH**!/Efi!**RESOURCE_TYPE**!!**SCHEMA_VERSION_CAPITAL**!.h>
+#include <RedfishJsonStructure/!**EDK2_REDFISH_CS_RELATIVE_PATH**!/Efi!**RESOURCE_TYPE**!!**SCHEMA_VERSION_CAPITAL**!.h>
 CHAR8 mResourceTypeStr [] = "#!**RESOURCE_TYPE**!";
 BOOLEAN IsRevisonController = !**IS_VERSION_CONTROLLED_BOOLEAN**!;
 
 // Support !**RESOURCE_TYPE**! !**SCHEMA_VERSION_CAPITAL**! 
-EFI_REST_RESOURCE_INTERP_SUPPORTED ResourceInterP [] = {
+EFI_REST_JSON_STRUCTURE_SUPPORTED ResourceInterP [] = {
   {
     {
       (LIST_ENTRY *)&ResourceInterP[0], (LIST_ENTRY *)&ResourceInterP[0]
@@ -49,8 +50,7 @@ EFI_REST_RESOURCE_INTERP_SUPPORTED ResourceInterP [] = {
   }
 };
 
-EFI_REST_RESOURCE_INTERPRETER_PROTOCOL *mRestRsrcInterpProt = NULL;
-EFI_HANDLE mInterpHandle = NULL;
+EFI_REST_JSON_STRUCTURE_PROTOCOL *mRestJsonStructureProt = NULL;
 
 /**
   This function gets the string of revision number.
@@ -105,13 +105,11 @@ CheckSupportedSchema (IN CHAR8 *ResoruceRaw)
   json_t *JsonObjReturned;
   CHAR8 *TempChar;
   UINTN StrIndex;
-  EFI_STATUS Status;
   UINTN StrMajorIndex;
   UINTN StrMinorIndex;
   UINTN StrErrataIndex;
   UINTN OdataTypeStrLen;
 
-  Status = EFI_SUCCESS;
   JsonObjReturned = json_loads(ResoruceRaw, 0, NULL);
   TempJsonObj = json_object_get(JsonObjReturned, "@odata.type");
   if (TempJsonObj == NULL) {
@@ -181,8 +179,7 @@ Error:;
   This function sets the structure of givin JSON resource in text format through
   supported Redfish schema interpreter.
   
-  @param[in]    This              EFI_REST_RESOURCE_INTERPRETER_PROTOCOL instance. 
-  @param[in]    RestEx            EFI REST EX protocol.
+  @param[in]    This              EFI_REST_JSON_STRUCTURE_PROTOCOL instance. 
   @param[in]    RsrcTypeIdentifier  Resource type identifier.
   @param[in]    ResoruceRaw       Given Restful resource.
   @param[in]    PropertyName      Name of property defined in the data type to retrieve.
@@ -194,22 +191,20 @@ Error:;
 **/
 EFI_STATUS
 EFIAPI
-!**RESOURCE_TYPE**!ToEfiStruct (
-  IN EFI_REST_RESOURCE_INTERPRETER_PROTOCOL   *This,
-  IN EFI_REST_EX_PROTOCOL                     *RestEx OPTIONAL,
-  IN EFI_REST_RESOURCE_TYPE_IDENTIFIER        *RsrcIdentifier OPTIONAL,
+!**RESOURCE_TYPE**!ToStruct (
+  IN EFI_REST_JSON_STRUCTURE_PROTOCOL         *This,
+  IN EFI_REST_JSON_RESOURCE_TYPE_IDENTIFIER   *RsrcIdentifier OPTIONAL,
   IN CHAR8                                    *ResoruceRaw,
-  IN CHAR8                                    *PropertyName,
-  OUT EFI_REST_RESOURCE_INTERPED_PROPERTY_HEADER  **InterpProp
+  IN CHAR8                                    *PropertyName OPTIONAL,
+  OUT EFI_REST_JSON_STRUCTURE_HEADER          **InterpProp
 )
 {
   EFI_REDFISH_!**RESOURCE_TYPE_CAPITAL**!!**SCHEMA_VERSION_CAPITAL_UNDERSCORE**! *!**RESOURCE_TYPE**!!**SCHEMA_VERSION_CAPITAL**!;
   !**EDK2_REDFISH_CS_NAME**! *!**RESOURCE_TYPE**!!**SCHEMA_VERSION_CAPITAL**!Cs;
-  EFI_REST_RESOURCE_INTERPED_PROPERTY_HEADER *RestIntrpHeader;
+  EFI_REST_JSON_STRUCTURE_HEADER *RestIntrpHeader;
   CHAR8 *ResourceTypeMajorVersion;
   CHAR8 *ResourceTypeMinorVersion;
   CHAR8 *ResourceTypeErrataVersion;
-  UINTN Length;
   EFI_STATUS Status;
 
   if (ResoruceRaw == NULL || (RsrcIdentifier != NULL && RsrcIdentifier->NameSpace.ResourceTypeName == NULL)) {
@@ -234,7 +229,7 @@ EFIAPI
     return EFI_UNSUPPORTED;
   }
 
-  Status = !**EDK2_REDFISH_JSON_TO_CS_FUNC_NAME**! (ResoruceRaw, &!**RESOURCE_TYPE**!!**SCHEMA_VERSION_CAPITAL**!Cs);
+  Status = (EFI_STATUS)!**EDK2_REDFISH_JSON_TO_CS_FUNC_NAME**! (ResoruceRaw, &!**RESOURCE_TYPE**!!**SCHEMA_VERSION_CAPITAL**!Cs);
   if (EFI_ERROR (Status)){
     return Status;
   }
@@ -243,37 +238,65 @@ EFIAPI
   if (!**RESOURCE_TYPE**!!**SCHEMA_VERSION_CAPITAL**! == NULL){
     return EFI_OUT_OF_RESOURCES;
   }
-  RestIntrpHeader = (EFI_REST_RESOURCE_INTERPED_PROPERTY_HEADER *)!**RESOURCE_TYPE**!!**SCHEMA_VERSION_CAPITAL**!;
+  RestIntrpHeader = (EFI_REST_JSON_STRUCTURE_HEADER *)!**RESOURCE_TYPE**!!**SCHEMA_VERSION_CAPITAL**!;
   !**RESOURCE_TYPE**!!**SCHEMA_VERSION_CAPITAL**!->!**RESOURCE_TYPE**! = !**RESOURCE_TYPE**!!**SCHEMA_VERSION_CAPITAL**!Cs;
   ResourceTypeMajorVersion = "!**SCHEMA_VERSION_MAJOR_STRING**!";
   ResourceTypeMinorVersion = "!**SCHEMA_VERSION_MINOR_STRING**!";
   ResourceTypeErrataVersion = "!**SCHEMA_VERSION_ERRATA_STRING**!";
-  Length = sizeof (!**EDK2_REDFISH_CS_NAME**!);
   //
   // Set header.
   //
-  RestIntrpHeader->Signature = REST_RESOURCE_INTERP_SIGNATURE; 
-  RestIntrpHeader->Length = Length;
-  RestIntrpHeader->RsrcIdentifier.NameSpace.ResourceTypeName = (CHAR8 *)AllocatePool (AsciiStrSize ("!**RESOURCE_TYPE**!"));
-  AsciiStrCpy (RestIntrpHeader->RsrcIdentifier.NameSpace.ResourceTypeName, "!**RESOURCE_TYPE**!");
-  RestIntrpHeader->RsrcIdentifier.NameSpace.MajorVersion = (CHAR8 *)AllocatePool (AsciiStrSize (ResourceTypeMajorVersion));
-  AsciiStrCpy (RestIntrpHeader->RsrcIdentifier.NameSpace.MajorVersion, ResourceTypeMajorVersion);
-  RestIntrpHeader->RsrcIdentifier.NameSpace.MinorVersion = (CHAR8 *)AllocatePool (AsciiStrSize (ResourceTypeMinorVersion));
-  AsciiStrCpy (RestIntrpHeader->RsrcIdentifier.NameSpace.MinorVersion, ResourceTypeMinorVersion);
-  RestIntrpHeader->RsrcIdentifier.NameSpace.ErrataVersion = (CHAR8 *)AllocatePool (AsciiStrSize (ResourceTypeErrataVersion));
-  AsciiStrCpy (RestIntrpHeader->RsrcIdentifier.NameSpace.ErrataVersion, ResourceTypeErrataVersion);
-  RestIntrpHeader->RsrcIdentifier.DataType = (CHAR8 *)AllocatePool (AsciiStrSize ("!**RESOURCE_TYPE**!"));
-  AsciiStrCpy (RestIntrpHeader->RsrcIdentifier.DataType, "!**RESOURCE_TYPE**!");
+  RestIntrpHeader->JsonRsrcIdentifier.NameSpace.ResourceTypeName = (CHAR8 *)AllocatePool (AsciiStrSize ("!**RESOURCE_TYPE**!"));
+  AsciiStrCpyS (RestIntrpHeader->JsonRsrcIdentifier.NameSpace.ResourceTypeName, AsciiStrSize ("!**RESOURCE_TYPE**!"), "!**RESOURCE_TYPE**!");
+  RestIntrpHeader->JsonRsrcIdentifier.NameSpace.MajorVersion = (CHAR8 *)AllocatePool (AsciiStrSize (ResourceTypeMajorVersion));
+  AsciiStrCpyS (RestIntrpHeader->JsonRsrcIdentifier.NameSpace.MajorVersion, AsciiStrSize (ResourceTypeMajorVersion), ResourceTypeMajorVersion);
+  RestIntrpHeader->JsonRsrcIdentifier.NameSpace.MinorVersion = (CHAR8 *)AllocatePool (AsciiStrSize (ResourceTypeMinorVersion));
+  AsciiStrCpyS (RestIntrpHeader->JsonRsrcIdentifier.NameSpace.MinorVersion, AsciiStrSize (ResourceTypeMinorVersion), ResourceTypeMinorVersion);
+  RestIntrpHeader->JsonRsrcIdentifier.NameSpace.ErrataVersion = (CHAR8 *)AllocatePool (AsciiStrSize (ResourceTypeErrataVersion));
+  AsciiStrCpyS (RestIntrpHeader->JsonRsrcIdentifier.NameSpace.ErrataVersion, AsciiStrSize (ResourceTypeErrataVersion), ResourceTypeErrataVersion);
+  RestIntrpHeader->JsonRsrcIdentifier.DataType = (CHAR8 *)AllocatePool (AsciiStrSize ("!**RESOURCE_TYPE**!"));
+  AsciiStrCpyS (RestIntrpHeader->JsonRsrcIdentifier.DataType, AsciiStrSize ("!**RESOURCE_TYPE**!"), "!**RESOURCE_TYPE**!");
   *InterpProp = RestIntrpHeader;
   return EFI_SUCCESS;
+}
+
+
+/**
+  The wrapper function of !**RESOURCE_TYPE**!ToStruct which invokes **RESOURCE_TYPE**!ToStruct
+  with additional parameter "PropertyName".
+  
+  @param[in]    This              EFI_REST_JSON_STRUCTURE_PROTOCOL instance. 
+  @param[in]    RsrcTypeIdentifier  Resource type identifier.
+  @param[in]    ResoruceRaw       Given Restful resource.
+  @param[out]   InterpProp        Property interpreted from given ResoruceRaw.
+   
+  @retval EFI_SUCCESS
+  @retval Others
+
+**/
+EFI_STATUS
+EFIAPI
+!**RESOURCE_TYPE**!ToStructWrapper (
+  IN EFI_REST_JSON_STRUCTURE_PROTOCOL         *This,
+  IN EFI_REST_JSON_RESOURCE_TYPE_IDENTIFIER   *RsrcIdentifier OPTIONAL,
+  IN CHAR8                                    *ResoruceRaw,
+  OUT EFI_REST_JSON_STRUCTURE_HEADER          **InterpProp
+)
+{
+  return !**RESOURCE_TYPE**!ToStruct (
+			  This,
+			  RsrcIdentifier,
+			  ResoruceRaw,
+			  NULL,
+			  InterpProp
+			  );
 }
 
 /**
   This function returns JSON property in text format for the given structure through
   supported Restful data interpreter.
   
-  @param[in]    This            EFI_REST_RESOURCE_INTERPRETER_PROTOCOL instance. 
-  @param[in]    RestEx          EFI REST EX protocol.
+  @param[in]    This            EFI_REST_JSON_STRUCTURE_PROTOCOL instance. 
   @param[in]    InterpProp      Given Restful resource.
   @param[out]   ResoruceRaw     Resource in RESTfuls service oriented property interpreted from given ResoruceRaw.
                                 Caller has to release the memory allocated for ResoruceRaw using DestoryJson function.
@@ -284,24 +307,22 @@ EFIAPI
 **/
 EFI_STATUS
 EFIAPI
-!**RESOURCE_TYPE**!FromEfiStruct(
-  IN EFI_REST_RESOURCE_INTERPRETER_PROTOCOL *This,
-  IN EFI_REST_EX_PROTOCOL                   *RestEx,
-  IN EFI_REST_RESOURCE_INTERPED_PROPERTY_HEADER *InterpProp,
+!**RESOURCE_TYPE**!ToJson(
+  IN EFI_REST_JSON_STRUCTURE_PROTOCOL *This,
+  IN EFI_REST_JSON_STRUCTURE_HEADER *InterpProp,
   OUT CHAR8 **ResoruceRaw
 )
 {
   if (InterpProp == NULL || ResoruceRaw == NULL) {
     return EFI_INVALID_PARAMETER;
   }
-  return !**EDK2_REDFISH_CS_TO_JSON_FUNC_NAME**! (*((!**EDK2_REDFISH_CS_NAME**! **)((UINT8 *)InterpProp + sizeof (EFI_REST_RESOURCE_INTERPED_PROPERTY_HEADER))), ResoruceRaw);  
+  return (EFI_STATUS)!**EDK2_REDFISH_CS_TO_JSON_FUNC_NAME**! (*((!**EDK2_REDFISH_CS_NAME**! **)((UINT8 *)InterpProp + sizeof (EFI_REST_JSON_STRUCTURE_HEADER))), ResoruceRaw);  
 }
 
 /**
   This function destory structure retunred in !**RESOURCE_TYPE**!ToStruct.
   
-  @param[in]    This                EFI_REST_RESOURCE_INTERPRETER_PROTOCOL instance. 
-  @param[in]    RsrcTypeIdentifier  Resource type identifier.
+  @param[in]    This                EFI_REST_JSON_STRUCTURE_PROTOCOL instance. 
   @param[in]    InterpProp          Given Restful resource.
 
   @retval EFI_SUCCESS
@@ -310,10 +331,9 @@ EFIAPI
 **/
 EFI_STATUS
 EFIAPI
-!**RESOURCE_TYPE**!DestoryEfiStruct(
-  IN EFI_REST_RESOURCE_INTERPRETER_PROTOCOL   *This,
-  IN EFI_REST_RESOURCE_TYPE_IDENTIFIER        *RsrcIdentifier,
-  IN EFI_REST_RESOURCE_INTERPED_PROPERTY_HEADER  *InterpProp
+!**RESOURCE_TYPE**!DestoryStruct(
+  IN EFI_REST_JSON_STRUCTURE_PROTOCOL   *This,
+  IN EFI_REST_JSON_STRUCTURE_HEADER  *InterpProp
 )
 {
   EFI_REDFISH_!**RESOURCE_TYPE_CAPITAL**!!**SCHEMA_VERSION_CAPITAL_UNDERSCORE**! *!**RESOURCE_TYPE**!!**SCHEMA_VERSION_CAPITAL**!;
@@ -324,9 +344,9 @@ EFIAPI
 }
 
 /**
-  This function destory JSON raw text returned from !**RESOURCE_TYPE**!FromEfiStruct
+  This function destory JSON raw text returned from !**RESOURCE_TYPE**!FromStruct
   
-  @param[in]    This                EFI_REST_RESOURCE_INTERPRETER_PROTOCOL instance. 
+  @param[in]    This                EFI_REST_JSON_STRUCTURE_PROTOCOL instance. 
   @param[in]    RsrcTypeIdentifier  Resource type identifier.  
   @param[in]    ResoruceRaw         JSON raw text.
 
@@ -337,15 +357,15 @@ EFIAPI
 EFI_STATUS
 EFIAPI
 !**RESOURCE_TYPE**!DestoryJson(
-  IN EFI_REST_RESOURCE_INTERPRETER_PROTOCOL *This,
-  IN EFI_REST_RESOURCE_TYPE_IDENTIFIER *RsrcIdentifier,  
+  IN EFI_REST_JSON_STRUCTURE_PROTOCOL *This,
+  IN EFI_REST_JSON_RESOURCE_TYPE_IDENTIFIER *RsrcIdentifier,  
   IN CHAR8 *ResoruceRaw
 )
 {
   if (ResoruceRaw == NULL) {
     return EFI_INVALID_PARAMETER;
   }
-  return !**EDK2_REDFISH_DESTORY_JSON_FUNC_NAME**! (ResoruceRaw);
+  return (EFI_STATUS)!**EDK2_REDFISH_DESTORY_JSON_FUNC_NAME**! (ResoruceRaw);
 }
 
 /**
@@ -366,20 +386,18 @@ Redfish!**RESOURCE_TYPE**!!**SCHEMA_VERSION_CAPITAL_UNDERSCORE**!EntryPoint (
 {
   EFI_STATUS Status;
                       
-  if (mRestRsrcInterpProt == NULL) {
-    Status = gBS->LocateProtocol(&gEfiRestResourceInterpreterProtocolGuid, NULL, (VOID **)&mRestRsrcInterpProt);
+  if (mRestJsonStructureProt == NULL) {
+    Status = gBS->LocateProtocol(&gEfiRestJsonStructureProtocolGuid, NULL, (VOID **)&mRestJsonStructureProt);
     if ((EFI_ERROR (Status))) {
       return Status;
     }
   }
-  Status = mRestRsrcInterpProt->Register (
-              mRestRsrcInterpProt,
+  Status = mRestJsonStructureProt->Register (
+              mRestJsonStructureProt,
               ResourceInterP,
-              !**RESOURCE_TYPE**!ToEfiStruct,
-              !**RESOURCE_TYPE**!FromEfiStruct,
-              !**RESOURCE_TYPE**!DestoryEfiStruct,
-              !**RESOURCE_TYPE**!DestoryJson,
-              &mInterpHandle
+              !**RESOURCE_TYPE**!ToStructWrapper,
+              !**RESOURCE_TYPE**!ToJson,
+              !**RESOURCE_TYPE**!DestoryStruct
               );
   return Status;
 }
@@ -402,8 +420,8 @@ Redfish!**RESOURCE_TYPE**!!**SCHEMA_VERSION_CAPITAL_UNDERSCORE**!Unload (
   IN EFI_HANDLE ImageHandle
   )
 {
-  if (mRestRsrcInterpProt != NULL && mInterpHandle != NULL) {
-    mRestRsrcInterpProt->Unregister (mRestRsrcInterpProt, mInterpHandle);
-  }
+  //
+  // Shall we implement Unregister() function in EFI JSON Structure Protocol?
+  //
   return EFI_SUCCESS;
 }
