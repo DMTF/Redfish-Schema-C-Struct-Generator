@@ -1,7 +1,9 @@
 #
 # Redfish JSON resource to C structure converter source code generator.
 #
-# (C) Copyright 2018-2019 Hewlett Packard Enterprise Development LP
+# Copyright Notice:
+# Copyright 2021 DMTF. All rights reserved.
+# License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/master/LICENSE.md
 #
 REDFISH_STRUCT_NAME_HEAD = "Redfish"
 REDFISH_STRUCT_NAME_TAIL = "_CS"
