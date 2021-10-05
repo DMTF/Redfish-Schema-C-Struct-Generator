@@ -229,6 +229,11 @@ In order to flexibly support different bindings on top of ***Redfish-JSON-C-Stru
 | **RedfishCS_Vague** |Redfish C Structure of JSON property which data type could be boolean, int or string.<br/><br/>`typedef enum {`<br/>`RedfishCS_Vague_DataType_String = 1,`<br/>`RedfishCS_Vague_DataType_Int64,`<br/>`RedfishCS_Vague_DataType_Bool`<br/>`} RedfishCS_Vague_DataType;`<br/><br/>`typedef union {`<br/>`RedfishCS_char  *CharPtr;`<br/>`RedfishCS_bool  *BoolPtr;`<br/>`RedfishCS_int64 *Int64Ptr;`<br/>`} RedfishCS_Vague_Ptr;`<br/><br/>`typedef struct _RedfishCS_Vague {`<br/>`RedfishCS_Vague_DataType DataType;`<br/>`RedfishCS_Vague_Ptr 	   DataValue;`<br/>`} RedfishCS_Vague;`<br/><br/>
 
 ## README.md for Each Converter
-README.md is provided for each ***Redfish-JSON-C-Struct-Converter*** under its source directory.
+README.md is provided in each ***Redfish-JSON-C-Struct-Converter*** under script-generated /src directory.
 See src/ServiceRoot/ServiceRoot.v1_1_0/README.md for the example.
+
+## Redfish Schema Release Validation
+- DSP8010_Schema_2018.1
+- DSP8010_Schema_2019.1
+- DSP8010_Schema_2020.4
 
