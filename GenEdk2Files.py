@@ -359,16 +359,24 @@ class RedfishCSEdk2:
 
         fo = open(self.Edk2RedfishIntpOutputDir + os.path.normpath("/" + self.Edk2RedfishIntpComponentDsc),"a")
         if SchemaVersion == "":
+            fo.write("!if $(REDFISH_" + RedfishCs.ResourceType.upper() + ") OR $(REDFISH_CLIENT_ALL_AUTOGENED)\n")
             fo.write("  " + self.Edk2RedfishJsonCsPackagePath + "RedfishClientPkg/Converter/" + RedfishCs.ResourceType + "/" + RedfishCsSchemaDxe_INF_File + "\n")
+            fo.write("!endif\n")
         else:
+            fo.write("!if $(REDFISH_" + RedfishCs.ResourceType.upper() + "_" + SchemaVersion.upper() + ") OR $(REDFISH_CLIENT_ALL_AUTOGENED)\n")
             fo.write("  " + self.Edk2RedfishJsonCsPackagePath + "RedfishClientPkg/Converter/" + RedfishCs.ResourceType + "/" + SchemaVersion + "/" + RedfishCsSchemaDxe_INF_File + "\n")
+            fo.write("!endif\n")            
         fo.close()
 
         fo = open(self.Edk2RedfishIntpOutputDir + os.path.normpath("/" + self.Edk2RedfishIntpLibDsc),"a")
         if SchemaVersion == "":
+            fo.write("!if $(REDFISH_" + RedfishCs.ResourceType.upper() + ") OR $(REDFISH_CLIENT_ALL_AUTOGENED)\n")
             fo.write("  " + self.LibClass + "|" + self.Edk2RedfishJsonCsPackagePath + "RedfishClientPkg/ConverterLib" + Edk2BindingDir + "/" + RedfishCs.ResourceType + "/Lib.inf" + "\n")
+            fo.write("!endif\n")            
         else:
+            fo.write("!if $(REDFISH_" + RedfishCs.ResourceType.upper() + "_" + SchemaVersion.upper() + ") OR $(REDFISH_CLIENT_ALL_AUTOGENED)\n")
             fo.write("  " + self.LibClass + "|" + self.Edk2RedfishJsonCsPackagePath + "RedfishClientPkg/ConverterLib" + Edk2BindingDir + "/" + RedfishCs.ResourceType + "/" + SchemaVersion + "/Lib.inf" + "\n")
+            fo.write("!endif\n")            
         fo.close()        
 
         fo = open(os.path.normpath(RedfishCsInterpreter_Source_Schema_dir + "/" + RedfishCsSchemaDxe_C_File),"w")
