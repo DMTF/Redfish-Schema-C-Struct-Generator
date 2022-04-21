@@ -2,7 +2,7 @@
 # Redfish JSON resource to C structure converter source code generator.
 #
 # Copyright Notice:
-# Copyright 2021 DMTF. All rights reserved.
+# Copyright 2021-2022 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/master/LICENSE.md
 #
 import os
@@ -44,10 +44,10 @@ HPECopyright  = "//\n" \
                 "// Auto-generated file by Redfish Schema C Structure Generator.\n" + \
                 "// https://github.com/DMTF/Redfish-Schema-C-Struct-Generator.\n" + \
                 "//\n" + \
-                "//  (C) Copyright 2019-2021 Hewlett Packard Enterprise Development LP<BR>\n" + \
+                "//  (C) Copyright 2019-2022 Hewlett Packard Enterprise Development LP<BR>\n" + \
                 "//\n" + \
                 "// Copyright Notice:\n" + \
-                "// Copyright 2019-2021 Distributed Management Task Force, Inc. All rights reserved.\n" + \
+                "// Copyright 2019-2022 Distributed Management Task Force, Inc. All rights reserved.\n" + \
                 "// License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/master/LICENSE.md\n" +\
                 "//\n"
 
