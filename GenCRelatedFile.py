@@ -372,9 +372,11 @@ class RedfishCS_CRelatedFile:
             return NewContent
         Pattern = REDFISH_STRUCT_NAME_TAIL + "$"
         Found = re.search (Pattern, Content)
+
         if Found != None:
-            NewContent = Content.rstrip (REDFISH_STRUCT_NAME_TAIL)
+            NewContent = Content [:len (Content) - len(REDFISH_STRUCT_NAME_TAIL)]
             return NewContent
+
         Pattern = REDFISH_STRUCT_NAME_TAIL + "[A-za-Z0-9]+"
         if Found != None:
             Content = Content
