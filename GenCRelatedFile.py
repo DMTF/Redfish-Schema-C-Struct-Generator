@@ -3,7 +3,7 @@
 #
 # Copyright Notice:
 # Copyright 2021-2022 DMTF. All rights reserved.
-# License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/master/LICENSE.md
+# License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/main/LICENSE.md
 #
 import os
 import sys
@@ -48,7 +48,7 @@ HPECopyright  = "//\n" \
                 "//\n" + \
                 "// Copyright Notice:\n" + \
                 "// Copyright 2019-2022 Distributed Management Task Force, Inc. All rights reserved.\n" + \
-                "// License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/master/LICENSE.md\n" +\
+                "// License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/main/LICENSE.md\n" +\
                 "//\n"
 
 CCodeErrorExitCode = C_SRC_TAB_SPACE + "if (Status != RedfishCS_status_success) {\n" +\
