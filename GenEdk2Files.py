@@ -2,7 +2,7 @@
 # Redfish JSON resource to C structure converter source code generator.
 #
 # Copyright Notice:
-# Copyright 2021-2022 DMTF. All rights reserved.
+# Copyright 2021-2024 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/main/LICENSE.md
 #
 import os
@@ -109,7 +109,8 @@ class RedfishCSEdk2:
         self.Edk2RedfishIntpTempDxeInf = ""
         self.Edk2RedfishIntpTempInclude = ""
         self.Edk2RedfishIntpComponentDsc = ""        
-        self.Edk2RedfishIntpLibDsc = ""          
+        self.Edk2RedfishIntpLibDsc = ""
+        self.Edk2RedfishIntpFdf = ""          
         self.Edk2RedfishintpKeywordsDict = {}
         self.Edk2CStructureName = ""
 
@@ -292,6 +293,7 @@ class RedfishCSEdk2:
 
         self.Edk2RedfishIntpComponentDsc = "RedfishSchemaCsInterpreter_Component.dsc"
         self.Edk2RedfishIntpLibDsc = "RedfishSchemaCsInterpreter_Lib.dsc"
+        self.Edk2RedfishIntpFdf = "RedfishSchemaCsInterpreter_Component.fdf"
 
         self.Edk2RedfishIntpTempDxeC = self.Edk2RedfishIntpTempFilesDir + os.path.normpath("/RedfishCsDxe.temp")
         self.Edk2RedfishIntpTempDxeInf = self.Edk2RedfishIntpTempFilesDir + os.path.normpath("/RedfishCsInf.temp")
@@ -356,28 +358,50 @@ class RedfishCSEdk2:
         if not os.path.exists (self.Edk2RedfishIntpOutputDir + os.path.normpath("/" + self.Edk2RedfishIntpLibDsc)):            
             fo = open(self.Edk2RedfishIntpOutputDir + os.path.normpath("/" + self.Edk2RedfishIntpLibDsc),"w")
             fo.close()
-
+        if not os.path.exists (self.Edk2RedfishIntpOutputDir + os.path.normpath("/" + self.Edk2RedfishIntpFdf)):
+            fo = open(self.Edk2RedfishIntpOutputDir + os.path.normpath("/" + self.Edk2RedfishIntpFdf),"w")
+            fo.close()
+           
+        #
+        # edk2 driver DSC
+        #
         fo = open(self.Edk2RedfishIntpOutputDir + os.path.normpath("/" + self.Edk2RedfishIntpComponentDsc),"a")
         if SchemaVersion == "":
-            fo.write("!if $(REDFISH_" + RedfishCs.ResourceType.upper() + ") OR $(REDFISH_CLIENT_ALL_AUTOGENED)\n")
+            fo.write("!if ($(REDFISH_" + RedfishCs.ResourceType.upper() + ") == TRUE) OR ($(REDFISH_CLIENT_ALL_AUTOGENED) == TRUE)\n")
             fo.write("  " + self.Edk2RedfishJsonCsPackagePath + "RedfishClientPkg/Converter/" + RedfishCs.ResourceType + "/" + RedfishCsSchemaDxe_INF_File + "\n")
             fo.write("!endif\n")
         else:
-            fo.write("!if $(REDFISH_" + RedfishCs.ResourceType.upper() + "_" + SchemaVersion.upper() + ") OR $(REDFISH_CLIENT_ALL_AUTOGENED)\n")
+            fo.write("!if ($(REDFISH_" + RedfishCs.ResourceType.upper() + "_" + SchemaVersion.upper() + ") == TRUE) OR ($(REDFISH_CLIENT_ALL_AUTOGENED) == TRUE)\n")
             fo.write("  " + self.Edk2RedfishJsonCsPackagePath + "RedfishClientPkg/Converter/" + RedfishCs.ResourceType + "/" + SchemaVersion + "/" + RedfishCsSchemaDxe_INF_File + "\n")
-            fo.write("!endif\n")            
+            fo.write("!endif\n")
         fo.close()
 
+        #
+        # edk2 library DSC
+        #
         fo = open(self.Edk2RedfishIntpOutputDir + os.path.normpath("/" + self.Edk2RedfishIntpLibDsc),"a")
         if SchemaVersion == "":
-            fo.write("!if $(REDFISH_" + RedfishCs.ResourceType.upper() + ") OR $(REDFISH_CLIENT_ALL_AUTOGENED)\n")
+            fo.write("!if ($(REDFISH_" + RedfishCs.ResourceType.upper() + ") == TRUE) OR ($(REDFISH_CLIENT_ALL_AUTOGENED) == TRUE)\n")
             fo.write("  " + self.LibClass + "|" + self.Edk2RedfishJsonCsPackagePath + "RedfishClientPkg/ConverterLib" + Edk2BindingDir + "/" + RedfishCs.ResourceType + "/Lib.inf" + "\n")
             fo.write("!endif\n")            
         else:
-            fo.write("!if $(REDFISH_" + RedfishCs.ResourceType.upper() + "_" + SchemaVersion.upper() + ") OR $(REDFISH_CLIENT_ALL_AUTOGENED)\n")
+            fo.write("!if ($(REDFISH_" + RedfishCs.ResourceType.upper() + "_" + SchemaVersion.upper() + ") == TRUE) OR ($(REDFISH_CLIENT_ALL_AUTOGENED) == TRUE)\n")
             fo.write("  " + self.LibClass + "|" + self.Edk2RedfishJsonCsPackagePath + "RedfishClientPkg/ConverterLib" + Edk2BindingDir + "/" + RedfishCs.ResourceType + "/" + SchemaVersion + "/Lib.inf" + "\n")
-            fo.write("!endif\n")            
-        fo.close()        
+            fo.write("!endif\n")
+        fo.close()
+        #
+        # edk2 driver FDF
+        #        
+        fo = open(self.Edk2RedfishIntpOutputDir + os.path.normpath("/" + self.Edk2RedfishIntpFdf),"a")
+        if SchemaVersion == "":
+            fo.write("!if ($(REDFISH_" + RedfishCs.ResourceType.upper() + ") == TRUE) OR ($(REDFISH_CLIENT_ALL_AUTOGENED) == TRUE)\n")
+            fo.write("  INF  " + self.Edk2RedfishJsonCsPackagePath + "RedfishClientPkg/Converter/" + RedfishCs.ResourceType + "/" + RedfishCsSchemaDxe_INF_File + "\n")
+            fo.write("!endif\n")
+        else:
+            fo.write("!if ($(REDFISH_" + RedfishCs.ResourceType.upper() + "_" + SchemaVersion.upper() + ") == TRUE) OR ($(REDFISH_CLIENT_ALL_AUTOGENED) == TRUE)\n")
+            fo.write("  INF  " + self.Edk2RedfishJsonCsPackagePath + "RedfishClientPkg/Converter/" + RedfishCs.ResourceType + "/" + SchemaVersion + "/" + RedfishCsSchemaDxe_INF_File + "\n")
+            fo.write("!endif\n")
+        fo.close()
 
         fo = open(os.path.normpath(RedfishCsInterpreter_Source_Schema_dir + "/" + RedfishCsSchemaDxe_C_File),"w")
         Edk2RedfishIntpTempDxeCLines = self.Replacekeyworkds(Edk2RedfishIntpTempDxeCLines)

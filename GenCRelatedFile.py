@@ -2,7 +2,7 @@
 # Redfish JSON resource to C structure converter source code generator.
 #
 # Copyright Notice:
-# Copyright 2021-2022 DMTF. All rights reserved.
+# Copyright 2021-2024 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/main/LICENSE.md
 #
 import os
@@ -818,18 +818,31 @@ class RedfishCS_CRelatedFile:
 
         CodeStr = self.GenCStructToJsonCCodeForStructure (ResourceType, SchemaVersion, StructnameShort, NestedStructName, PrecedentKey, CStructPointer + "->" + key, False)
         if "RedfishCS_status CS_To_JSON_" + PrecedentKey in self.CStructureToJsonStructureExistFunc:
-            # Funciton already exist.
+            # Function already exist.
             return
         self.CStructureToJsonStructureExistFunc.append ("RedfishCS_status CS_To_JSON_" + PrecedentKey)
 
         self.CStructureToJsonStructureFuncions += "static RedfishCS_status CS_To_JSON_" + PrecedentKey  + "(json_t *CsJson, char *Key, " + StructureMemberDataType + " *CSPtr)\n"
         self.CStructureToJsonStructureFuncions += "{\n"
+        
+        if CodeStr != "":
+            self.CStructureToJsonStructureFuncions += C_SRC_TAB_SPACE + "json_t *CsParentJson;\n\n"
+        
         self.CStructureToJsonStructureFuncions += C_SRC_TAB_SPACE + "if (CSPtr == NULL) {\n"
         self.CStructureToJsonStructureFuncions += C_SRC_TAB_SPACE * 2 + "return RedfishCS_status_success;\n"
-        self.CStructureToJsonStructureFuncions += C_SRC_TAB_SPACE + "}\n"
+        self.CStructureToJsonStructureFuncions += C_SRC_TAB_SPACE + "}\n\n"
+        
+        if CodeStr != "":
+            self.CStructureToJsonStructureFuncions += C_SRC_TAB_SPACE + "CsParentJson = CsJson;\n"
+        self.CStructureToJsonStructureFuncions += C_SRC_TAB_SPACE + "CsJson = json_object();\n"
+        self.CStructureToJsonStructureFuncions += C_SRC_TAB_SPACE + "if (CsJson == NULL) {\n"
+        self.CStructureToJsonStructureFuncions += C_SRC_TAB_SPACE * 2 + "return RedfishCS_status_unsupported;\n"
+        self.CStructureToJsonStructureFuncions += C_SRC_TAB_SPACE + "}\n\n"
 
         if CodeStr != "":
             self.CStructureToJsonStructureFuncions += CodeStr
+            self.CStructureToJsonStructureFuncions += C_SRC_TAB_SPACE + "// Set to parent JSON object.\n"
+            self.CStructureToJsonStructureFuncions += C_SRC_TAB_SPACE + "if (json_object_set_new (CsParentJson, Key, CsJson) == -1) {goto Error;}\n\n"
         else:
             self.CStructureToJsonStructureFuncions += C_SRC_TAB_SPACE + "// Check if this is RedfishCS_Type_CS_EmptyProp.\n"
             self.CStructureToJsonStructureFuncions += C_SRC_TAB_SPACE + "CsEmptyPropLinkToJson(CsJson, Key, &CSPtr->Prop);\n"

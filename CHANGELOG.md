@@ -1,6 +1,11 @@
 
 # Change Log
 
+## [1.3] - 2024-1-8
+  - Fix unused variable build error under GCC.
+  - Link child JSON object to the parent CS.
+  - Generate edk2 FDF file.
+
 ## [1.2] - 2021-8-17
 - Fixe the issue when turn nested JSON object into nested C structure.
 - Fix the duplicated function name issue.

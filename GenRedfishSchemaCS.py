@@ -2,7 +2,7 @@
 # Redfish JSON resource to C structure converter source code generator.
 #
 # Copyright Notice:
-# Copyright 2021 DMTF. All rights reserved.
+# Copyright 2021-2024 DMTF. All rights reserved.
 # License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-Tacklebox/blob/main/LICENSE.md
 #
 import os
@@ -816,7 +816,7 @@ Edk2RedfishJsonCsPackagePath = "RedfishCsIntpPkg"
 #JsonFileIo.close()
 # Test Redfish property
 
-print ("\n\nDMTF Redfish Schema to C Structure Generator Copyrights 2018-2024 v1.2_schema2020.4")
+print ("\n\nDMTF Redfish Schema to C Structure Generator Copyrights 2018-2024 v1.3_schema2021.4")
 
 if "-logfile" in sys.argv:
     ToolLogInformation = ToolLogger.ToolLog (TOOL_LOG_TO_FILE, "RedfishCs.log")
