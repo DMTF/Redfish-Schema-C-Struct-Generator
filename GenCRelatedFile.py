@@ -40,16 +40,18 @@ from RedfishCSDef import LOGFOR_CSTRUCTURE_TO_JSON_ALIAS_STRUCTURE_NAME
 from RedfishCSDef import LOGFOR_CSTRUCTURE_TO_JSON_RESOURCETYPE
 from RedfishCSDef import LOGFOR_CSTRUCTURE_TO_JSON_VERSION
 
-HPECopyright  = "//\n" \
-                "// Auto-generated file by Redfish Schema C Structure Generator.\n" + \
-                "// https://github.com/DMTF/Redfish-Schema-C-Struct-Generator.\n" + \
-                "//\n" + \
-                "//  (C) Copyright 2019-2022 Hewlett Packard Enterprise Development LP<BR>\n" + \
-                "//\n" + \
-                "// Copyright Notice:\n" + \
-                "// Copyright 2019-2022 Distributed Management Task Force, Inc. All rights reserved.\n" + \
-                "// License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/main/LICENSE.md\n" +\
-                "//\n"
+ContributorCopyright  = "//\n" \
+                        "// Auto-generated file by Redfish Schema C Structure Generator.\n" + \
+                        "// https://github.com/DMTF/Redfish-Schema-C-Struct-Generator.\n" + \
+                        "//\n" + \
+                        "//  (C) Copyright 2019-2022 Hewlett Packard Enterprise Development LP<BR>\n" + \
+                        "//  Copyright (c) 2023-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.\n" + \
+                        "//  Copyright (C) 2024 Advanced Micro Devices, Inc. All rights reserved.<BR>\n" + \
+                        "//\n" + \
+                        "// Copyright Notice:\n" + \
+                        "// Copyright 2019-2024 Distributed Management Task Force, Inc. All rights reserved.\n" + \
+                        "// License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/master/LICENSE.md\n" +\
+                        "//\n"
 
 CCodeErrorExitCode = C_SRC_TAB_SPACE + "if (Status != RedfishCS_status_success) {\n" +\
                      C_SRC_TAB_SPACE * 2 + "goto Error;\n" +\
@@ -1195,7 +1197,7 @@ class RedfishCS_CRelatedFile:
         StructureName = self.StructureName
         StructureMemberDataType = self.StructureMemberDataType
 
-        self.RedfishSchemaFile.CIncludeFileText = HPECopyright + "\n"
+        self.RedfishSchemaFile.CIncludeFileText = ContributorCopyright + "\n"
         self.RedfishSchemaFile.CIncludeFileText += ("#ifndef " + REDFISH_STRUCT_NAME_HEAD + \
                             RedfishCs.ResourceType.capitalize() + \
                             "_" + RedfishCs.SchemaVersion.capitalize() + \
@@ -1498,7 +1500,7 @@ class RedfishCS_CRelatedFile:
         except BreakForLoop:
             pass
 
-        self.CTextFile = HPECopyright + "\n"
+        self.CTextFile = ContributorCopyright + "\n"
         self.CTextFile += ("#include" + "\"" + self.CIncludeFileName + "\"\n")
         self.CTextFile += ("#include <stdlib.h>\n")
         self.CTextFile += ("#include <string.h>\n")

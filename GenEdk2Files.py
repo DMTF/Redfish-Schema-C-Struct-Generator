@@ -24,35 +24,39 @@ from RedfishCSDef import REDFISH_GET_DATATYPE_VALUE
 from RedfishCSDef import TAB_SPACE
 from RedfishCSDef import MEMBER_DESCRIPTION_CHARS
 
-HPECopyright  = "//\n" \
-                "// Auto-generated file by Redfish Schema C Structure Generator.\n" + \
-                "// https://github.com/DMTF/Redfish-Schema-C-Struct-Generator.\n" + \
-                "//\n" + \
-                "//  (C) Copyright 2019-2022 Hewlett Packard Enterprise Development LP<BR>\n" + \
-                "//  SPDX-License-Identifier: BSD-2-Clause-Patent\n" + \
-                "//\n" + \
-                "// Auto-generated file by Redfish Schema C Structure Generator.\n" + \
-                "// https://github.com/DMTF/Redfish-Schema-C-Struct-Generator.\n" + \
-                "// Copyright Notice:\n" + \
-                "// Copyright 2019-2022 Distributed Management Task Force, Inc. All rights reserved.\n" + \
-                "// License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/main/LICENSE.md\n" + \
-                "//\n"
+ContributorCopyright  = "//\n" \
+                        "// Auto-generated file by Redfish Schema C Structure Generator.\n" + \
+                        "// https://github.com/DMTF/Redfish-Schema-C-Struct-Generator.\n" + \
+                        "//\n" + \
+                        "//  (C) Copyright 2019-2022 Hewlett Packard Enterprise Development LP<BR>\n" + \
+                        "//  Copyright (c) 2023-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.\n" + \
+                        "//  Copyright (C) 2024 Advanced Micro Devices, Inc. All rights reserved.<BR>\n" + \
+                        "//  SPDX-License-Identifier: BSD-2-Clause-Patent\n" + \
+                        "//\n" + \
+                        "// Auto-generated file by Redfish Schema C Structure Generator.\n" + \
+                        "// https://github.com/DMTF/Redfish-Schema-C-Struct-Generator.\n" + \
+                        "// Copyright Notice:\n" + \
+                        "// Copyright 2019-2024 Distributed Management Task Force, Inc. All rights reserved.\n" + \
+                        "// License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/master/LICENSE.md\n" + \
+                        "//\n"
 
 DMTFCopyright = "//----------------------------------------------------------------------------\n" + \
                 "// Copyright Notice:\n" \
-                "// Copyright 2019-2021 Distributed Management Task Force, Inc. All rights reserved.\n" + \
-                "// License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/main/LICENSE.md\n" + \
+                "// Copyright 2019-2024 Distributed Management Task Force, Inc. All rights reserved.\n" + \
+                "// License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/master/LICENSE.md\n" + \
                 "//----------------------------------------------------------------------------\n"
 
 Edk2InfFileCopyright = "#\n" + \
                        "#  (C) Copyright 2019-2022 Hewlett Packard Enterprise Development LP<BR>\n" + \
+                       "#  Copyright (c) 2023-2024, NVIDIA CORPORATION & AFFILIATES. All rights reserved.\n" + \
+                       "#  Copyright (C) 2024 Advanced Micro Devices, Inc. All rights reserved.<BR>\n" + \
                        "#  SPDX-License-Identifier: BSD-2-Clause-Patent\n" + \
                        "#\n" + \
                        "# Auto-generated file by Redfish Schema C Structure Generator.\n" + \
                        "# https://github.com/DMTF/Redfish-Schema-C-Struct-Generator.\n" + \
                        "# Copyright Notice:\n" + \
-                       "# Copyright 2019-2022 Distributed Management Task Force, Inc. All rights reserved.\n" + \
-                       "# License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/main/LICENSE.md\n" + \
+                       "# Copyright 2019-2024 Distributed Management Task Force, Inc. All rights reserved.\n" + \
+                       "# License: BSD 3-Clause License. For full text see link: https://github.com/DMTF/Redfish-JSON-C-Struct-Converter/blob/master/LICENSE.md\n" + \
                        "#\n"
 
 Edk2InfFileTemp = "[Defines]\n" + \
@@ -135,7 +139,7 @@ class RedfishCSEdk2:
             SchemaVersion = "_" + RedfishCs.SchemaVersion.upper()
             PrefixForwardDir = "../"
 
-        self.RedfishSchemaFile.Edk2IncludeFileText = HPECopyright + "\n"
+        self.RedfishSchemaFile.Edk2IncludeFileText = ContributorCopyright + "\n"
         self.RedfishSchemaFile.Edk2IncludeFileText += ("#ifndef " + "EFI_" + REDFISH_STRUCT_NAME_HEAD.upper() + \
                             RedfishCs.ResourceType.upper() + \
                             SchemaVersion + \
