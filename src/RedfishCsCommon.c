@@ -1469,8 +1469,8 @@ CsEmptyPropLinkToJson (
 
   JsonString     Input JSON raw string
   NewJsonBuffer  Pointer to memory for the updated JSON raw string in
-                 size of BuufferSize.
-  BuufferSize    The buffer size of NewJsonBuffer
+                 size of BufferSize.
+  BufferSize    The buffer size of NewJsonBuffer
 
   Return RedfishCS_status.
 
@@ -1479,7 +1479,7 @@ RedfishCS_status
 RemoveUnchangeableProperties (
    RedfishCS_char   *JsonString,
    RedfishCS_char   *NewJsonBuffer,
-   RedfishCS_uint32  BuufferSize
+   RedfishCS_uint32  BufferSize
    )
 {
   json_t            *JsonObj;
@@ -1502,7 +1502,7 @@ RemoveUnchangeableProperties (
 
   TempChar = json_dumps ((json_t *)JsonObj, JSON_INDENT (2));
   if (TempChar != NULL) {
-    if ((strlen (TempChar) + 1) > BuufferSize) {
+    if ((strlen (TempChar) + 1) > BufferSize) {
       Status = RedfishCS_status_insufficient_memory;
     } else {
       memcpy (NewJsonBuffer, TempChar, strlen (TempChar) + 1);

@@ -111,8 +111,8 @@ DestoryCsMemory (
 
   JsonString     Input JSON raw string
   NewJsonBuffer  Pointer to memory for the updated JSON raw string in
-                 size of BuufferSize.
-  BuufferSize    The buffer size of NewJsonBuffer
+                 size of BufferSize.
+  BufferSize    The buffer size of NewJsonBuffer
 
   Return RedfishCS_status.
 
@@ -121,7 +121,7 @@ RedfishCS_status
 RemoveUnchangeableProperties (
    RedfishCS_char   *JsonString,
    RedfishCS_char   *NewJsonBuffer,
-   RedfishCS_uint32  BuufferSize
+   RedfishCS_uint32  BufferSize
    );
 
 typedef struct _RedfishCS_char_Array          RedfishCS_char_Array;
